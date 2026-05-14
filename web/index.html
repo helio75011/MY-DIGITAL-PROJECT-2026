@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Header SafeWalk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="tailwind.js"></script>
+</head>
+<body>
+
+    <header class="w-full bg-white shadow-sm border-b border-gray-100">
+
+        <!-- Main navigation container -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                
+                <!-- Logo Section -->
+                <div class="flex-shrink-0 flex items-center pl-4 lg:pl-12">
+                    <a href="#" class="text-safe-blue font-bold text-2xl tracking-tight">
+                        SafeWalk
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation Menu -->
+                <nav class="hidden md:flex space-x-10">
+                    <!-- Active Link (Solidaire) -->
+                    <a href="#" class="text-safe-blue font-semibold text-base px-1 pb-1 border-b-2 border-safe-blue">
+                        Solidaire
+                    </a>
+                    
+                    <!-- Inactive Links -->
+                    <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base transition duration-150 ease-in-out px-1 pb-1 border-b-2 border-transparent">
+                        Premium
+                    </a>
+                    <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base transition duration-150 ease-in-out px-1 pb-1 border-b-2 border-transparent">
+                        Safety Tips
+                    </a>
+                    <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base transition duration-150 ease-in-out px-1 pb-1 border-b-2 border-transparent">
+                        About
+                    </a>
+                </nav>
+
+                <!-- Right side (Login/Get Started) -->
+                <div class="hidden md:flex items-center space-x-6 pr-4 lg:pr-12">
+                    <a href="#" class="text-safe-gray hover:text-safe-blue font-semibold text-base transition duration-150 ease-in-out">
+                        Log In
+                    </a>
+                    <a href="#" class="bg-safe-blue text-white font-medium px-6 py-2.5 rounded-full hover:bg-opacity-90 transition duration-150 ease-in-out shadow-sm text-sm">
+                        Get Started
+                    </a>
+                </div>
+
+                <!-- Mobile menu button (Hamburger) -->
+                <div class="flex items-center md:hidden pr-4">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-safe-blue" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <!-- Icon when menu is closed. -->
+                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu (Hidden by default, you would toggle this with JS) -->
+        <div class="md:hidden hidden bg-white border-t border-gray-100" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#" class="text-safe-blue block px-3 py-2 rounded-md text-base font-semibold bg-gray-50">Solidaire</a>
+                <a href="#" class="text-safe-gray hover:text-safe-blue hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium">Premium</a>
+                <a href="#" class="text-safe-gray hover:text-safe-blue hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium">Safety Tips</a>
+                <a href="#" class="text-safe-gray hover:text-safe-blue hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium">About</a>
+            </div>
+            <div class="pt-4 pb-4 border-t border-gray-200">
+                <div class="flex items-center px-5 space-x-4">
+                    <a href="#" class="text-safe-gray hover:text-safe-blue font-semibold text-base w-1/2 text-center py-2 border border-gray-300 rounded-full">
+                        Log In
+                    </a>
+                    <a href="#" class="bg-safe-blue text-white font-medium w-1/2 text-center py-2 rounded-full">
+                        Get Started
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dummy content below to show the header in context -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="text-center text-gray-500">
+            <p>Contenu de la page en dessous du header...</p>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

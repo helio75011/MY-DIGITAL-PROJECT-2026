@@ -1,0 +1,14 @@
+body {
+    font-family: 'Inter', sans-serif;
+    /* Using a light background to make the white header pop out clearly as in the image */
+    background-color: #f3f4f6; 
+    margin: 0;
+    padding: 0;
+}
+        
+/* Custom color configurations mimicking the design */
+:root {
+    --primary-blue: #0b196c; /* Deep blue from the logo and button */
+    --nav-text: #4b5563; /* Grayish text for inactive links */
+    --nav-hover: #111827; /* Darker text on hover */
+}
