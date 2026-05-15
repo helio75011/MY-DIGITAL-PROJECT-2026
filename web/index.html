@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeWalk - Rentrez sereine</title>
+    <title>Link&Walk - Rentrez sereine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -52,6 +52,27 @@
             background: linear-gradient(135deg, #0b155a 0%, #050a2e 100%);
             border-radius: 2.5rem;
         }
+
+        /* Sidebar mobile */
+        .mobile-sidebar {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .mobile-sidebar.open {
+            transform: translateX(0);
+        }
+        .sidebar-overlay {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .sidebar-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        body.sidebar-open {
+            overflow: hidden;
+        }
     </style>
     <script>
         tailwind.config = {
@@ -84,7 +105,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <div class="flex-shrink-0 flex items-center lg:pl-4">
-                    <a href="#" class="text-safe-blue font-bold text-2xl tracking-tight">SafeWalk</a>
+                    <a href="#" class="text-safe-blue font-bold text-2xl tracking-tight">Link&Walk</a>
                 </div>
                 <nav class="hidden md:flex space-x-10">
                     <a href="#" class="text-safe-blue font-semibold text-base px-1 pb-1 border-b-2 border-safe-blue">Solidaire</a>
@@ -96,9 +117,37 @@
                     <a href="#" class="text-safe-gray hover:text-safe-blue font-semibold text-base transition duration-150">Log In</a>
                     <a href="#" class="bg-safe-blue text-white font-medium px-6 py-2.5 rounded-full hover:bg-opacity-90 transition duration-150 text-sm">Get Started</a>
                 </div>
+
+                <!-- Bouton burger (mobile uniquement) -->
+                <button id="sidebar-toggle" aria-expanded="false" aria-controls="mobile-sidebar" aria-label="Ouvrir le menu" class="md:hidden text-safe-blue text-2xl focus:outline-none focus:ring-2 focus:ring-safe-blue rounded-md p-2">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
             </div>
         </div>
     </header>
+
+    <!-- Overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay fixed inset-0 bg-black/50 z-50 md:hidden"></div>
+
+    <!-- Sidebar mobile -->
+    <aside id="mobile-sidebar" class="mobile-sidebar fixed top-0 right-0 h-full w-72 max-w-[80%] bg-white shadow-2xl z-50 md:hidden flex flex-col">
+        <div class="flex items-center justify-between px-6 h-20 border-b border-gray-100">
+            <span class="text-safe-blue font-bold text-2xl tracking-tight">Link&Walk</span>
+            <button id="sidebar-close" aria-label="Fermer le menu" class="text-safe-blue text-2xl focus:outline-none focus:ring-2 focus:ring-safe-blue rounded-md p-2">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <nav class="flex flex-col px-6 py-6 space-y-2">
+            <a href="#" class="text-safe-blue font-semibold text-base py-3 border-b border-gray-100">Solidaire</a>
+            <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base py-3 border-b border-gray-100 transition">Premium</a>
+            <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base py-3 border-b border-gray-100 transition">Safety Tips</a>
+            <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base py-3 border-b border-gray-100 transition">About</a>
+        </nav>
+        <div class="mt-auto px-6 pb-8 space-y-4">
+            <a href="#" class="block text-center text-safe-gray hover:text-safe-blue font-semibold text-base transition">Log In</a>
+            <a href="#" class="block text-center bg-safe-blue text-white font-medium px-6 py-3 rounded-full hover:bg-opacity-90 transition text-sm">Get Started</a>
+        </div>
+    </aside>
 
     <main class="flex-grow">
         <!-- Hero Section -->
@@ -311,7 +360,7 @@
                     <div class="testimonial-card p-10 flex flex-col justify-between h-full card-hover">
                         <i class="fa-solid fa-quote-right quote-icon"></i>
                         <p class="text-safe-gray text-lg leading-relaxed italic mb-8 relative z-10">
-                            "Grâce à SafeWalk, je ne refuse plus de sorties tardives. Savoir que Léa m'attendait pour faire les 10 minutes de marche jusqu'à chez moi a tout changé."
+                            "Grâce à Link&Walk, je ne refuse plus de sorties tardives. Savoir que Léa m'attendait pour faire les 10 minutes de marche jusqu'à chez moi a tout changé."
                         </p>
                         <div class="flex items-center gap-4">
                             <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop" alt="Camille" class="w-14 h-14 rounded-full object-cover">
@@ -348,7 +397,7 @@
                         Reprenez le pouvoir sur vos nuits.
                     </h2>
                     <p class="text-lg md:text-xl text-blue-100/80 mb-12 max-w-3xl mx-auto leading-relaxed">
-                        Téléchargez l'application SafeWalk dès aujourd'hui et rejoignez plus de <br class="hidden md:block"> 50 000 femmes qui marchent sereinement.
+                        Téléchargez l'application Link&Walk dès aujourd'hui et rejoignez plus de <br class="hidden md:block"> 50 000 femmes qui marchent sereinement.
                     </p>
                     
                     <div class="flex flex-col sm:flex-row justify-center items-center gap-6">
@@ -378,9 +427,10 @@
     <!-- Footer -->
     <footer class="bg-white border-t border-gray-100 py-12">
         <div class="max-w-7xl mx-auto px-4 text-center text-safe-gray text-sm">
-            &copy; 2024 SafeWalk. Tous droits réservés.
+            &copy; 2024 Link&Walk. Tous droits réservés.
         </div>
     </footer>
 
+    <script src="script.js"></script>
 </body>
 </html>
