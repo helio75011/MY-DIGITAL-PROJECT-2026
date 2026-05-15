@@ -1,14 +1,44 @@
 body {
     font-family: 'Inter', sans-serif;
-    /* Using a light background to make the white header pop out clearly as in the image */
-    background-color: #f3f4f6; 
+    background-color: #ffffff;
     margin: 0;
     padding: 0;
 }
         
-/* Custom color configurations mimicking the design */
 :root {
-    --primary-blue: #0b196c; /* Deep blue from the logo and button */
-    --nav-text: #4b5563; /* Grayish text for inactive links */
-    --nav-hover: #111827; /* Darker text on hover */
+    --primary-blue: #0b155a;
+    --accent-purple: #f3e8ff;
+    --accent-purple-text: #6b21a8;
+}
+
+.card-hover {
+    transition: all 0.3s ease;
+}
+.card-hover:hover {
+    transform: translateY(-5px);
+}
+
+.step-number {
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+.testimonial-card {
+    background-color: #f8f9fa;
+    border-radius: 2rem;
+    position: relative;
+}
+
+.quote-icon {
+    position: absolute;
+    top: 1.5rem;
+    right: 2rem;
+    opacity: 0.1;
+    font-size: 3rem;
+    color: #0b155a;
+}
+
+/* Style spécifique pour la section Call-To-Action finale */
+.cta-section {
+    background: linear-gradient(135deg, #0b155a 0%, #050a2e 100%);
+    border-radius: 2.5rem;
 }

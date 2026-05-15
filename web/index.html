@@ -3,97 +3,384 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Header SafeWalk</title>
+    <title>SafeWalk - Rentrez sereine</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <script src="tailwind.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+        
+        :root {
+            --primary-blue: #0b155a;
+            --accent-purple: #f3e8ff;
+            --accent-purple-text: #6b21a8;
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+        }
+
+        .step-number {
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        .testimonial-card {
+            background-color: #f8f9fa;
+            border-radius: 2rem;
+            position: relative;
+        }
+
+        .quote-icon {
+            position: absolute;
+            top: 1.5rem;
+            right: 2rem;
+            opacity: 0.1;
+            font-size: 3rem;
+            color: #0b155a;
+        }
+
+        /* Style spécifique pour la section Call-To-Action finale */
+        .cta-section {
+            background: linear-gradient(135deg, #0b155a 0%, #050a2e 100%);
+            border-radius: 2.5rem;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'safe-blue': '#0b155a',
+                        'safe-dark-blue': '#050a2e',
+                        'safe-gray': '#4b5563',
+                        'safe-light-gray': '#e5e7eb',
+                        'badge-bg': '#f3e8ff',
+                        'badge-text': '#4c1d95',
+                        'premium-purple': '#c4b5fd',
+                        'stat-purple': '#6366f1',
+                        'sentinel-green': '#064e3b',
+                    },
+                    boxShadow: {
+                        'custom-glow': '0 10px 25px -5px rgba(11, 21, 90, 0.3)',
+                        'card-shadow': '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
+<body class="min-h-screen flex flex-col">
 
-    <header class="w-full bg-white shadow-sm border-b border-gray-100">
-
-        <!-- Main navigation container -->
+    <!-- Header -->
+    <header class="w-full bg-white shadow-sm border-b border-gray-100 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
-                
-                <!-- Logo Section -->
-                <div class="flex-shrink-0 flex items-center pl-4 lg:pl-12">
-                    <a href="#" class="text-safe-blue font-bold text-2xl tracking-tight">
-                        SafeWalk
-                    </a>
+                <div class="flex-shrink-0 flex items-center lg:pl-4">
+                    <a href="#" class="text-safe-blue font-bold text-2xl tracking-tight">SafeWalk</a>
                 </div>
-
-                <!-- Desktop Navigation Menu -->
                 <nav class="hidden md:flex space-x-10">
-                    <!-- Active Link (Solidaire) -->
-                    <a href="#" class="text-safe-blue font-semibold text-base px-1 pb-1 border-b-2 border-safe-blue">
-                        Solidaire
-                    </a>
-                    
-                    <!-- Inactive Links -->
-                    <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base transition duration-150 ease-in-out px-1 pb-1 border-b-2 border-transparent">
-                        Premium
-                    </a>
-                    <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base transition duration-150 ease-in-out px-1 pb-1 border-b-2 border-transparent">
-                        Safety Tips
-                    </a>
-                    <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base transition duration-150 ease-in-out px-1 pb-1 border-b-2 border-transparent">
-                        About
-                    </a>
+                    <a href="#" class="text-safe-blue font-semibold text-base px-1 pb-1 border-b-2 border-safe-blue">Solidaire</a>
+                    <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base transition duration-150 px-1 pb-1 border-b-2 border-transparent">Premium</a>
+                    <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base transition duration-150 px-1 pb-1 border-b-2 border-transparent">Safety Tips</a>
+                    <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base transition duration-150 px-1 pb-1 border-b-2 border-transparent">About</a>
                 </nav>
-
-                <!-- Right side (Login/Get Started) -->
-                <div class="hidden md:flex items-center space-x-6 pr-4 lg:pr-12">
-                    <a href="#" class="text-safe-gray hover:text-safe-blue font-semibold text-base transition duration-150 ease-in-out">
-                        Log In
-                    </a>
-                    <a href="#" class="bg-safe-blue text-white font-medium px-6 py-2.5 rounded-full hover:bg-opacity-90 transition duration-150 ease-in-out shadow-sm text-sm">
-                        Get Started
-                    </a>
-                </div>
-
-                <!-- Mobile menu button (Hamburger) -->
-                <div class="flex items-center md:hidden pr-4">
-                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-safe-blue" aria-expanded="false">
-                        <span class="sr-only">Open main menu</span>
-                        <!-- Icon when menu is closed. -->
-                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mobile Menu (Hidden by default, you would toggle this with JS) -->
-        <div class="md:hidden hidden bg-white border-t border-gray-100" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="#" class="text-safe-blue block px-3 py-2 rounded-md text-base font-semibold bg-gray-50">Solidaire</a>
-                <a href="#" class="text-safe-gray hover:text-safe-blue hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium">Premium</a>
-                <a href="#" class="text-safe-gray hover:text-safe-blue hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium">Safety Tips</a>
-                <a href="#" class="text-safe-gray hover:text-safe-blue hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium">About</a>
-            </div>
-            <div class="pt-4 pb-4 border-t border-gray-200">
-                <div class="flex items-center px-5 space-x-4">
-                    <a href="#" class="text-safe-gray hover:text-safe-blue font-semibold text-base w-1/2 text-center py-2 border border-gray-300 rounded-full">
-                        Log In
-                    </a>
-                    <a href="#" class="bg-safe-blue text-white font-medium w-1/2 text-center py-2 rounded-full">
-                        Get Started
-                    </a>
+                <div class="hidden md:flex items-center space-x-6 lg:pr-4">
+                    <a href="#" class="text-safe-gray hover:text-safe-blue font-semibold text-base transition duration-150">Log In</a>
+                    <a href="#" class="bg-safe-blue text-white font-medium px-6 py-2.5 rounded-full hover:bg-opacity-90 transition duration-150 text-sm">Get Started</a>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Dummy content below to show the header in context -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="text-center text-gray-500">
-            <p>Contenu de la page en dessous du header...</p>
-        </div>
+    <main class="flex-grow">
+        <!-- Hero Section -->
+        <section class="relative overflow-hidden bg-white border-b border-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20 w-full">
+                <div class="flex flex-col lg:flex-row items-center justify-between gap-12">
+                    <div class="w-full lg:w-1/2 flex flex-col items-start space-y-6 z-10">
+                        <div class="inline-block bg-badge-bg text-badge-text font-semibold text-xs px-4 py-1.5 rounded-full">
+                            Votre sécurité, notre priorité
+                        </div>
+                        <h1 class="text-5xl lg:text-6xl font-extrabold text-safe-blue leading-tight tracking-tight">
+                            Rentrez sereine,<br>à chaque pas.
+                        </h1>
+                        <p class="text-safe-gray text-lg max-w-lg leading-relaxed">
+                            Rejoignez une communauté bienveillante d'accompagnatrices et d'agents certifiés pour vos trajets nocturnes. La ville vous appartient, jour et nuit.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-2">
+                            <a href="#" class="inline-flex items-center justify-center px-8 py-3.5 bg-safe-blue text-white font-semibold rounded-full hover:bg-opacity-90 transition shadow-custom-glow">
+                                <i class="fa-solid fa-download mr-2"></i> Télécharger l'app
+                            </a>
+                        </div>
+                    </div>
+                    <div class="w-full lg:w-1/2 relative flex justify-center lg:justify-end">
+                        <div class="relative w-full max-w-md rounded-3xl overflow-hidden shadow-2xl">
+                            <img src="media/woman.png" alt="Femme marchant sereinement la nuit" class="w-full h-[450px] object-cover rounded-3xl">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section : Choisissez votre tranquillité -->
+        <section class="py-20 bg-white">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-safe-blue mb-4">Choisissez votre tranquillité</h2>
+                    <p class="text-safe-gray text-lg">Deux solutions adaptées à vos besoins et votre itinéraire.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                    <!-- Carte Solidaire -->
+                    <div class="bg-white rounded-[40px] p-8 md:p-12 shadow-sm border border-gray-100 flex flex-col card-hover">
+                        <div class="mb-8">
+                            <div class="w-12 h-12 bg-badge-bg flex items-center justify-center rounded-xl mb-8">
+                                <i class="fa-solid fa-users-line text-badge-text text-xl"></i>
+                            </div>
+                            <h3 class="text-2xl md:text-3xl font-bold text-safe-blue mb-4">Accompagnement Solidaire</h3>
+                            <p class="text-safe-gray leading-relaxed mb-8">Un réseau 100% féminin basé sur l'entraide. Marchez avec une "Guardian" bénévole qui effectue le même trajet que vous ou habite votre quartier.</p>
+                            <ul class="space-y-4 mb-10">
+                                <li class="flex items-center text-safe-blue font-medium">
+                                    <span class="w-6 h-6 rounded-full border-2 border-green-500 flex items-center justify-center mr-3">
+                                        <i class="fa-solid fa-check text-green-500 text-[10px]"></i>
+                                    </span>
+                                    Profils vérifiés (Identité + Vidéo)
+                                </li>
+                                <li class="flex items-center text-safe-blue font-medium">
+                                    <span class="w-6 h-6 rounded-full border-2 border-green-500 flex items-center justify-center mr-3">
+                                        <i class="fa-solid fa-check text-green-500 text-[10px]"></i>
+                                    </span>
+                                    Gratuite et solidaire
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="mt-auto">
+                            <a href="#" class="inline-flex items-center text-badge-text font-bold hover:underline">Découvrir le programme <i class="fa-solid fa-arrow-right ml-2"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Carte Premium -->
+                    <div class="bg-safe-dark-blue rounded-[40px] p-8 md:p-12 text-white relative overflow-hidden card-hover">
+                        <div class="mb-8 relative z-10">
+                            <div class="w-12 h-12 bg-white/10 flex items-center justify-center rounded-xl mb-8 border border-white/20">
+                                <i class="fa-solid fa-shield-halved text-white text-xl"></i>
+                            </div>
+                            <h3 class="text-2xl md:text-3xl font-bold mb-4">Escorte Premium</h3>
+                            <p class="text-blue-100/80 leading-relaxed mb-8">Pour une sécurité absolue. Un agent de sécurité certifié et formé vous escorte de votre point de départ jusqu'au pas de votre porte.</p>
+                            <ul class="space-y-4 mb-10">
+                                <li class="flex items-center text-white font-medium">
+                                    <span class="w-6 h-6 rounded-full border-2 border-white/40 flex items-center justify-center mr-3">
+                                        <i class="fa-solid fa-check text-white text-[10px]"></i>
+                                    </span>
+                                    Agents professionnels agréés CNAPS
+                                </li>
+                                <li class="flex items-center text-white font-medium">
+                                    <span class="w-6 h-6 rounded-full border-2 border-white/40 flex items-center justify-center mr-3">
+                                        <i class="fa-solid fa-check text-white text-[10px]"></i>
+                                    </span>
+                                    Disponible 24h/24 et 7j/7
+                                </li>
+                            </ul>
+                        </div>
+                        <button class="relative z-10 w-full sm:w-auto bg-premium-purple text-safe-blue font-bold py-4 px-8 rounded-full hover:bg-white transition duration-300">Réserver un agent</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section : Philosophie & Statistiques -->
+        <section class="py-24 bg-white border-t border-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col lg:flex-row items-center gap-16">
+                    
+                    <!-- Colonne Gauche : Texte et Stats -->
+                    <div class="w-full lg:w-1/2 space-y-12">
+                        <div class="space-y-6">
+                            <h2 class="text-4xl md:text-5xl font-extrabold text-safe-blue leading-tight">
+                                The Serene Sentinel<br>Philosophy
+                            </h2>
+                            <p class="text-safe-gray text-lg leading-relaxed max-w-xl">
+                                Nous croyons que la technologie doit être un bouclier discret, pas une source de stress. Notre approche "Serene Sentinel" privilégie la prévention et l'humain avant l'urgence.
+                            </p>
+                        </div>
+
+                        <!-- Grille de Statistiques -->
+                        <div class="grid grid-cols-2 gap-x-8 gap-y-12">
+                            <div class="space-y-1">
+                                <span class="text-4xl font-extrabold text-stat-purple">50k+</span>
+                                <p class="text-safe-gray font-medium">Trajets sécurisés</p>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="text-4xl font-extrabold text-stat-purple">100%</span>
+                                <p class="text-safe-gray font-medium">Profils vérifiés</p>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="text-4xl font-extrabold text-stat-purple">4.9/5</span>
+                                <p class="text-safe-gray font-medium">Note moyenne</p>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="text-4xl font-extrabold text-stat-purple">24/7</span>
+                                <p class="text-safe-gray font-medium">Support humain</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Colonne Droite : Visuels de certification -->
+                    <div class="w-full lg:w-1/2 flex items-center justify-center lg:justify-end gap-6">
+                        <!-- Carte Sûreté Certifiée -->
+                        <div class="bg-gray-100 rounded-[32px] p-6 w-full max-w-[280px] flex flex-col items-center card-hover">
+                            <div class="w-full aspect-square bg-[#0a192f] rounded-3xl mb-6 overflow-hidden flex items-center justify-center relative">
+                                <div class="absolute inset-0 opacity-40 bg-gradient-to-br from-blue-500 to-transparent"></div>
+                                <i class="fa-solid fa-tablet-screen-button text-white/20 text-7xl absolute transform -rotate-12 -translate-x-4"></i>
+                                <i class="fa-solid fa-id-card-clip text-white/80 text-5xl relative z-10"></i>
+                            </div>
+                            <span class="text-safe-blue font-bold text-lg">Sûreté Certifiée</span>
+                        </div>
+
+                        <!-- Carte Guardian Program Platinum -->
+                        <div class="bg-sentinel-green rounded-[32px] p-8 w-full max-w-[280px] aspect-[4/5] flex flex-col items-center justify-center text-center card-hover">
+                            <div class=" w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                                <img src="media/Icon.png" alt="">
+                            </div>
+                            <h4 class="text-white font-bold text-lg leading-snug">
+                                Guardian Program<br>Platinum
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section : Simple. Rapide. Sûr. -->
+        <section class="py-24 bg-[#e9ecef]">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-safe-blue mb-4">Simple. Rapide. Sûr.</h2>
+                
+                <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-20">
+                    <!-- Étape 1 -->
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-safe-blue text-2xl font-black step-number mb-8">
+                            1
+                        </div>
+                        <h3 class="text-2xl font-bold text-safe-blue mb-4">Locate</h3>
+                        <p class="text-safe-gray leading-relaxed max-w-xs">
+                            Activez votre géolocalisation pour voir les accompagnatrices disponibles autour de vous immédiatement.
+                        </p>
+                    </div>
+
+                    <!-- Étape 2 -->
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-safe-blue text-2xl font-black step-number mb-8">
+                            2
+                        </div>
+                        <h3 class="text-2xl font-bold text-safe-blue mb-4">Choose</h3>
+                        <p class="text-safe-gray leading-relaxed max-w-xs">
+                            Sélectionnez votre mode (Solidaire ou Premium) et consultez le profil de votre accompagnateur.
+                        </p>
+                    </div>
+
+                    <!-- Étape 3 -->
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-safe-blue text-2xl font-black step-number mb-8">
+                            3
+                        </div>
+                        <h3 class="text-2xl font-bold text-safe-blue mb-4">Walk</h3>
+                        <p class="text-safe-gray leading-relaxed max-w-xs">
+                            Marchez en toute sérénité. Votre trajet est suivi en temps réel par notre centre de supervision.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section : Paroles de femmes -->
+        <section class="py-24 bg-white border-t border-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-safe-blue mb-12">Paroles de femmes</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Témoignage 1 -->
+                    <div class="testimonial-card p-10 flex flex-col justify-between h-full card-hover">
+                        <i class="fa-solid fa-quote-right quote-icon"></i>
+                        <p class="text-safe-gray text-lg leading-relaxed italic mb-8 relative z-10">
+                            "Grâce à SafeWalk, je ne refuse plus de sorties tardives. Savoir que Léa m'attendait pour faire les 10 minutes de marche jusqu'à chez moi a tout changé."
+                        </p>
+                        <div class="flex items-center gap-4">
+                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop" alt="Camille" class="w-14 h-14 rounded-full object-cover">
+                            <div>
+                                <h4 class="text-safe-blue font-bold text-lg">Camille, 28 ans</h4>
+                                <p class="text-safe-gray text-sm">Utilisatrice à Lyon</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Témoignage 2 -->
+                    <div class="testimonial-card p-10 flex flex-col justify-between h-full card-hover">
+                        <i class="fa-solid fa-quote-right quote-icon"></i>
+                        <p class="text-safe-gray text-lg leading-relaxed italic mb-8 relative z-10">
+                            "L'option Escorte Premium est incroyable. L'agent était très professionnel et discret. Je me suis sentie comme dans un cocon de sécurité."
+                        </p>
+                        <div class="flex items-center gap-4">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop" alt="Sarah" class="w-14 h-14 rounded-full object-cover">
+                            <div>
+                                <h4 class="text-safe-blue font-bold text-lg">Sarah, 34 ans</h4>
+                                <p class="text-safe-gray text-sm">Utilisatrice à Paris</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NOUVELLE Section Finale : CTA Téléchargement (image_c3d9d8.png) -->
+        <section class="py-12 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="cta-section py-16 px-8 md:px-16 text-center text-white shadow-2xl">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
+                        Reprenez le pouvoir sur vos nuits.
+                    </h2>
+                    <p class="text-lg md:text-xl text-blue-100/80 mb-12 max-w-3xl mx-auto leading-relaxed">
+                        Téléchargez l'application SafeWalk dès aujourd'hui et rejoignez plus de <br class="hidden md:block"> 50 000 femmes qui marchent sereinement.
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-6">
+                        <!-- Bouton App Store -->
+                        <a href="#" class="bg-white text-safe-dark-blue flex items-center gap-4 px-8 py-4 rounded-full hover:bg-blue-50 transition-all duration-300 group w-full sm:w-auto">
+                            <i class="fa-brands fa-apple text-3xl"></i>
+                            <div class="text-left leading-tight">
+                                <span class="text-[10px] uppercase font-bold tracking-wider block opacity-70">Download on the</span>
+                                <span class="text-xl font-extrabold block">App Store</span>
+                            </div>
+                        </a>
+                        
+                        <!-- Bouton Google Play -->
+                        <a href="#" class="bg-white text-safe-dark-blue flex items-center gap-4 px-8 py-4 rounded-full hover:bg-blue-50 transition-all duration-300 group w-full sm:w-auto">
+                            <i class="fa-brands fa-google-play text-2xl"></i>
+                            <div class="text-left leading-tight">
+                                <span class="text-[10px] uppercase font-bold tracking-wider block opacity-70">Get it on</span>
+                                <span class="text-xl font-extrabold block">Google Play</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <script src="script.js"></script>
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-100 py-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-safe-gray text-sm">
+            &copy; 2024 SafeWalk. Tous droits réservés.
+        </div>
+    </footer>
+
 </body>
 </html>
