@@ -77,6 +77,13 @@ export const colors = {
   infoCardMuted: '#afafaf', // texte secondaire des cartes info
   confirmBtnBg: '#040b6a', // bouton "Confirmer le trajet"
   starRose: '#d9436a', // étoiles de note
+
+  // --- Écran Suivi de trajet (node 23:2512) ---
+  statusCardBg: 'rgba(238,238,240,0.76)', // carte de statut translucide
+  statusGreen: '#07521d', // "Marche en groupe active"
+  progressTrack: '#878787', // fond de la barre de progression
+  progressLabel: '#767683', // labels DÉPART / ARRIVÉE / % complétée
+  trackingCardBg: 'rgba(0,6,102,0.65)', // carte accompagnatrice translucide
 } as const;
 
 export type Colors = typeof colors;

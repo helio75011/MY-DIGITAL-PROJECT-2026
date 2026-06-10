@@ -1,16 +1,13 @@
 import { Feather, FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
-import {
-  ImageBackground,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Logo } from '../components/Logo';
+import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AppHeader } from '../components/AppHeader';
+import { BottomNav } from '../components/BottomNav';
 import { RouteCard } from '../components/RouteCard';
+import { goToTab } from '../navigation/helpers';
+import type { RootStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 
 const tripMap = require('../assets/trip-map.png');
@@ -18,29 +15,20 @@ const tripMap = require('../assets/trip-map.png');
 /**
  * Écran "Chauffeur premium" (Figma 23:2360) — confirmation d'un trajet :
  * itinéraire, carte de suivi, profil chauffeur, infos véhicule/sécurité,
- * moyen de paiement et bouton de confirmation.
+ * moyen de paiement et bouton de confirmation (→ Tracking).
  */
 export function DriverScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   return (
     <View style={styles.root}>
-      {/* Header blanc : logo + réglages */}
-      <SafeAreaView edges={['top']} style={styles.headerSafe}>
-        <View style={styles.header}>
-          <View style={styles.headerLogo}>
-            <Logo size={40} />
-            <Text style={styles.headerLogoText}>Link & walk</Text>
-          </View>
-          <Pressable hitSlop={8}>
-            <Feather name="settings" size={22} color={colors.text} />
-          </Pressable>
-        </View>
-      </SafeAreaView>
+      <AppHeader />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Titre + itinéraire compact */}
         <View style={styles.topRow}>
           <View style={styles.titleCol}>
-            <Pressable hitSlop={8}>
+            <Pressable hitSlop={8} onPress={() => navigation.goBack()}>
               <Feather name="chevron-left" size={26} color={colors.navy} />
             </Pressable>
             <Text style={styles.pageTitle}>Chauffeur premium</Text>
@@ -87,7 +75,6 @@ export function DriverScreen() {
             <MaterialCommunityIcons name="car-outline" size={24} color="#ffffff" />
             <Text style={styles.infoTitle}>Véhicule</Text>
             <Text style={styles.infoMuted}>Berline Noire</Text>
-            <Text style={styles.infoStrong}>AB-123-CD</Text>
           </View>
           <View style={styles.infoCard}>
             <MaterialCommunityIcons name="shield-check-outline" size={20} color="#ffffff" />
@@ -106,34 +93,13 @@ export function DriverScreen() {
         </View>
 
         {/* Confirmer */}
-        <Pressable style={styles.confirmBtn}>
+        <Pressable style={styles.confirmBtn} onPress={() => navigation.navigate('TrackingPremium')}>
           <Text style={styles.confirmText}>Confirmer le trajet</Text>
         </Pressable>
       </ScrollView>
 
-      {/* Barre de navigation inférieure */}
-      <View style={styles.bottomNav}>
-        <NavItem icon="home" label="ACCUEIL" />
-        <NavItem icon="clock" label="HISTORIQUE" />
-        <NavItem icon="user" label="PROFILE" />
-        <NavItem icon="navigation" label="TRAJETS" active />
-      </View>
+      <BottomNav active="Trajets" onNavigate={(tab) => goToTab(navigation, tab)} />
     </View>
-  );
-}
-
-type NavItemProps = {
-  icon: keyof typeof Feather.glyphMap;
-  label: string;
-  active?: boolean;
-};
-
-function NavItem({ icon, label, active }: NavItemProps) {
-  return (
-    <Pressable style={[styles.navItem, active && styles.navItemActive]}>
-      <Feather name={icon} size={18} color={colors.navy} />
-      <Text style={styles.navLabel}>{label}</Text>
-    </Pressable>
   );
 }
 
@@ -141,26 +107,6 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: '#ffffff',
-  },
-  headerSafe: {
-    backgroundColor: '#ffffff',
-  },
-  header: {
-    height: 52,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    backgroundColor: '#ffffff',
-  },
-  headerLogo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  headerLogoText: {
-    fontSize: 11,
-    color: colors.primary,
   },
   content: {
     paddingHorizontal: 27,
@@ -356,39 +302,5 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
-  },
-  // Bottom nav
-  bottomNav: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.barSurface,
-    paddingHorizontal: 12,
-    paddingTop: 12,
-    paddingBottom: 28,
-    borderTopLeftRadius: 48,
-    borderTopRightRadius: 48,
-    shadowColor: colors.navy,
-    shadowOffset: { width: 0, height: -10 },
-    shadowOpacity: 0.06,
-    shadowRadius: 40,
-    elevation: 8,
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderRadius: 32,
-  },
-  navItemActive: {
-    backgroundColor: colors.navProfileBg,
-  },
-  navLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.55,
-    textTransform: 'uppercase',
-    marginTop: 4,
-    color: colors.navy,
   },
 });

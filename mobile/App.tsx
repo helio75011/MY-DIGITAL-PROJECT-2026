@@ -1,43 +1,38 @@
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ScreenSwitcher } from './components/ScreenSwitcher';
-import { BiometricScreen } from './screens/BiometricScreen';
-import { BookingScreen } from './screens/BookingScreen';
-import { DriverScreen } from './screens/DriverScreen';
-import { HistoryScreen } from './screens/HistoryScreen';
-import { HomeScreen } from './screens/HomeScreen';
-import { MatchingScreen } from './screens/MatchingScreen';
-import { ProfileScreen } from './screens/ProfileScreen';
-import { WelcomeScreen } from './screens/WelcomeScreen';
+import { RootNavigator } from './navigation';
+import type { RootStackParamList } from './navigation/types';
 
-// Catalogue des écrans pour le menu de dev (à remplacer par une vraie navigation).
-const SCREENS = {
-  Welcome: WelcomeScreen,
-  Biometric: BiometricScreen,
-  Home: HomeScreen,
-  History: HistoryScreen,
-  Profile: ProfileScreen,
-  Booking: BookingScreen,
-  Matching: MatchingScreen,
-  Driver: DriverScreen,
-} as const;
+// Réf de navigation partagée avec le menu de dev (saut direct vers un écran).
+const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
-type ScreenName = keyof typeof SCREENS;
+// Écrans atteignables depuis le menu de dev (ScreenSwitcher).
+const DEV_SCREENS: (keyof RootStackParamList)[] = [
+  'Welcome',
+  'Biometric',
+  'MainTabs',
+  'Matching',
+  'Driver',
+  'Tracking',
+  'TrackingPremium',
+];
 
 export default function App() {
-  const [current, setCurrent] = useState<ScreenName>('Welcome');
-  const Screen = SCREENS[current];
-
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
-      <Screen />
-      <ScreenSwitcher
-        screens={Object.keys(SCREENS) as ScreenName[]}
-        current={current}
-        onSelect={setCurrent}
-      />
+      <NavigationContainer ref={navigationRef}>
+        <RootNavigator />
+        <ScreenSwitcher
+          screens={DEV_SCREENS}
+          current={'MainTabs'}
+          onSelect={(screen) => {
+            if (navigationRef.isReady()) navigationRef.navigate(screen);
+          }}
+        />
+      </NavigationContainer>
     </SafeAreaProvider>
   );
 }

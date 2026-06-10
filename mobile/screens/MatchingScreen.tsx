@@ -1,10 +1,14 @@
 import { Feather } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppHeader } from '../components/AppHeader';
+import { BottomNav } from '../components/BottomNav';
 import { Companion, CompanionCard } from '../components/CompanionCard';
-import { Logo } from '../components/Logo';
 import { RouteCard } from '../components/RouteCard';
+import { goToTab } from '../navigation/helpers';
+import type { RootStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 
 // Accompagnatrices à proximité (Figma 23:2122).
@@ -18,28 +22,20 @@ const COMPANIONS: Companion[] = [
 
 /**
  * Écran "Trouver une accompagnatrice" (Figma 23:2122).
- * Carte itinéraire, liste des accompagnatrices à proximité, bottom nav.
+ * Carte itinéraire, liste des accompagnatrices à proximité ; sélectionner
+ * une accompagnatrice ouvre le suivi de trajet (Tracking).
  */
 export function MatchingScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   return (
     <View style={styles.root}>
-      {/* Header blanc : logo + réglages */}
-      <SafeAreaView edges={['top']} style={styles.headerSafe}>
-        <View style={styles.header}>
-          <View style={styles.headerLogo}>
-            <Logo size={40} />
-            <Text style={styles.headerLogoText}>Link & walk</Text>
-          </View>
-          <Pressable hitSlop={8}>
-            <Feather name="settings" size={22} color={colors.text} />
-          </Pressable>
-        </View>
-      </SafeAreaView>
+      <AppHeader />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Titre */}
         <View style={styles.titleRow}>
-          <Pressable hitSlop={8}>
+          <Pressable hitSlop={8} onPress={() => navigation.goBack()}>
             <Feather name="chevron-left" size={26} color={colors.navy} />
           </Pressable>
           <Text style={styles.pageTitle}>Trouver une accompagnatrice</Text>
@@ -54,43 +50,19 @@ export function MatchingScreen() {
         <Text style={styles.sectionTitle}>À proximité</Text>
         <View style={styles.list}>
           {COMPANIONS.map((c) => (
-            <CompanionCard key={c.id} companion={c} />
+            <CompanionCard key={c.id} companion={c} onSelect={() => navigation.navigate('Tracking')} />
           ))}
         </View>
       </ScrollView>
 
-      {/* Barre de navigation inférieure */}
-      <View style={styles.bottomNav}>
-        <NavItem icon="home" label="ACCUEIL" />
-        <NavItem icon="clock" label="HISTORIQUE" />
-        <NavItem icon="user" label="PROFILE" />
-        <NavItem icon="navigation" label="TRAJETS" active />
-      </View>
+      <BottomNav active="Trajets" onNavigate={(tab) => goToTab(navigation, tab)} />
     </View>
-  );
-}
-
-type NavItemProps = {
-  icon: keyof typeof Feather.glyphMap;
-  label: string;
-  active?: boolean;
-};
-
-function NavItem({ icon, label, active }: NavItemProps) {
-  return (
-    <Pressable style={[styles.navItem, active && styles.navItemActive]}>
-      <Feather name={icon} size={18} color={colors.navy} />
-      <Text style={styles.navLabel}>{label}</Text>
-    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#ffffff',
-  },
-  headerSafe: {
     backgroundColor: '#ffffff',
   },
   header: {
@@ -139,38 +111,5 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: 12,
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.barSurface,
-    paddingHorizontal: 12,
-    paddingTop: 12,
-    paddingBottom: 28,
-    borderTopLeftRadius: 48,
-    borderTopRightRadius: 48,
-    shadowColor: colors.navy,
-    shadowOffset: { width: 0, height: -10 },
-    shadowOpacity: 0.06,
-    shadowRadius: 40,
-    elevation: 8,
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderRadius: 32,
-  },
-  navItemActive: {
-    backgroundColor: colors.navProfileBg,
-  },
-  navLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.55,
-    textTransform: 'uppercase',
-    marginTop: 4,
-    color: colors.navy,
   },
 });

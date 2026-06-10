@@ -1,8 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Logo } from '../components/Logo';
+import type { RootStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 
 /**
@@ -10,6 +13,8 @@ import { colors } from '../theme/colors';
  * Fidèle à la maquette Figma (nœud 23:1146).
  */
 export function BiometricScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
@@ -38,9 +43,7 @@ export function BiometricScreen() {
         {/* Bouton de connexion */}
         <Pressable
           style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-          onPress={() => {
-            // TODO: déclencher l'authentification biométrique
-          }}
+          onPress={() => navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] })}
         >
           <Text style={styles.buttonText}>Me connecter</Text>
         </Pressable>

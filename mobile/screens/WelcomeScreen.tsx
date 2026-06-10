@@ -1,3 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -10,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Logo } from '../components/Logo';
+import type { RootStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 
 /**
@@ -17,6 +20,7 @@ import { colors } from '../theme/colors';
  * Fidèle à la maquette Figma (nœud 3:55).
  */
 export function WelcomeScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
 
@@ -65,9 +69,7 @@ export function WelcomeScreen() {
 
           <Pressable
             style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-            onPress={() => {
-              // TODO: brancher l'authentification
-            }}
+            onPress={() => navigation.navigate('Biometric')}
           >
             <Text style={styles.buttonText}>Suivant</Text>
           </Pressable>
