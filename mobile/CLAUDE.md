@@ -52,15 +52,24 @@ mobile/
 ├── App.tsx                  # point d'entrée — SafeAreaProvider + écran affiché
 ├── screens/
 │   ├── BiometricScreen.tsx  # vérification biométrique / empreinte (Figma 23:1146)
-│   ├── HistoryScreen.tsx    # historique des trajets, liste scrollable (Figma 23:1310)
+│   ├── BookingScreen.tsx    # réserver un trajet : itinéraire + modes (Figma 23:2060)
+│   ├── DriverScreen.tsx     # chauffeur premium : confirmation de trajet (Figma 23:2360)
+│   ├── HistoryScreen.tsx    # historique des trajets, liste scrollable (Figma 23:1304)
 │   ├── HomeScreen.tsx       # accueil SafeWalk : carte, trajet, contacts, SOS (Figma 23:1226)
+│   ├── MatchingScreen.tsx   # trouver une accompagnatrice : liste à proximité (Figma 23:2122)
+│   ├── ProfileScreen.tsx    # profil : avatar, stats, menus, déconnexion (Figma 23:1902)
 │   └── WelcomeScreen.tsx    # écran de connexion (Figma 3:55)
 ├── components/
 │   ├── Logo.tsx             # logo fleur Link & Walk en SVG (react-native-svg)
 │   ├── TripCard.tsx         # carte d'un trajet passé (avatar, badge, prix, timeline)
+│   ├── ModeCard.tsx         # carte de choix de mode de trajet (solidaire / premium)
+│   ├── CompanionCard.tsx    # carte d'une accompagnatrice (avatar, note, temps/distance, bouton)
+│   ├── RouteCard.tsx        # carte itinéraire MA POSITION → DESTINATION (Booking + Matching)
+│   ├── MenuRow.tsx          # ligne de menu (icône + titre + sous-titre + chevron) sur carte sombre
 │   └── ScreenSwitcher.tsx   # menu de dev (FAB) pour basculer entre écrans — temporaire
 ├── assets/
-│   └── map-bg-2.png         # fond carte de l'accueil (extrait de Figma 23:1227)
+│   ├── map-bg-2.png         # fond carte de l'accueil (extrait de Figma 23:1227)
+│   └── trip-map.png         # carte de suivi du trajet (extrait de Figma 23:2364)
 └── theme/
     └── colors.ts            # tokens couleurs issus de Figma
 ```
@@ -87,8 +96,11 @@ La référence visuelle est le fichier Figma **Link & Walk** :
 - Fichier : `70VIHWDwqr7yUAhtmLunBf`
 - Accueil SafeWalk (écran actuel) : nœud **`23:1226`**
   https://www.figma.com/design/70VIHWDwqr7yUAhtmLunBf/Link---Walk?node-id=23-1226&m=dev
-- Historique des trajets : nœud **`23:1310`** (liste seule ; header + bottom nav ajoutés
-  pour la cohérence)
+- Chauffeur premium (confirmation) : nœud **`23:2360`**
+- Trouver une accompagnatrice : nœud **`23:2122`**
+- Réserver un trajet : nœud **`23:2060`**
+- Profil : nœud **`23:1902`**
+- Historique des trajets : nœud **`23:1304`** (frame complète : titre, filtres, liste)
 - Vérification biométrique : nœud **`23:1146`**
 - Écran de connexion : nœud **`3:55`** (= `23:192`, copie identique)
   https://www.figma.com/design/70VIHWDwqr7yUAhtmLunBf/Link---Walk?node-id=3-55&m=dev

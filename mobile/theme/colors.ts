@@ -41,6 +41,42 @@ export const colors = {
   filterActiveBg: '#606bab', // pastille de filtre active
   filterInactiveBg: '#eeeef0', // pastille de filtre inactive
   filterInactiveText: '#030303',
+
+  // --- Écran Profil (node 23:1902) ---
+  verifiedGreen: '#27923e', // badge "Profil vérifié"
+  statCardBg: '#606bab', // cartes stats (trajets / score)
+  menuCardBg: '#000666', // cartes de menu
+  menuSubGreen: '#63a768', // sous-textes verts ("3 actifs", "Vérifié")
+  sectionTitle: 'rgba(0, 6, 102, 0.6)', // titres de section
+  logoutBg: '#fbeced', // fond bouton déconnexion
+  navProfileBg: '#e9e0f9', // pastille onglet Profile actif
+  heartRed: '#ba1a1a', // cœur "Score de confiance" / texte déconnexion
+
+  // --- Écran Réserver un trajet (node 23:2060) ---
+  routeFieldBg: '#eeeef0', // carte itinéraire (position/destination)
+  routeLabel: '#6d4ea2', // labels "MA POSITION" / "DESTINATION"
+  routeValue: '#1a1c1d', // valeurs d'adresse
+  modeSolidaireBg: '#e9e0f9', // carte mode "Accompagnement Solidaire"
+  modePremiumBg: '#000666', // carte mode "Chauffeur Premium"
+  priceRose: '#d9436a', // prix Premium
+  iconTileRose: '#d9436a', // pastille d'icône des cartes de mode
+  freeGreen: '#63a768', // badge "GRATUIT"
+  onDarkDesc: '#cecece', // description sur carte premium
+
+  // --- Écran Trouver une accompagnatrice (node 23:2122) ---
+  companionCardBg: '#000666', // carte accompagnatrice
+  ratingBg: '#d9d9d9', // badge de note (fond gris clair)
+  availableDot: '#abf4ac', // pastille "disponible" sur l'avatar
+  metaText: '#9d9d9d', // temps / distance
+  selectBtnBg: '#606bab', // bouton "Sélectionner"
+
+  // --- Écran Chauffeur premium (node 23:2360) ---
+  purple: '#6d4ea2', // accents violets (ETA, labels)
+  driverCardBg: '#606bab', // carte chauffeur
+  infoCardBg: '#000666', // cartes Véhicule / Sécurité
+  infoCardMuted: '#afafaf', // texte secondaire des cartes info
+  confirmBtnBg: '#040b6a', // bouton "Confirmer le trajet"
+  starRose: '#d9436a', // étoiles de note
 } as const;
 
 export type Colors = typeof colors;
