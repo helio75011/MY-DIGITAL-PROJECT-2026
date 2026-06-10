@@ -49,29 +49,48 @@ npx tsc --noEmit
 
 ```
 mobile/
-├── App.tsx                  # point d'entrée — SafeAreaProvider + écran
+├── App.tsx                  # point d'entrée — SafeAreaProvider + écran affiché
 ├── screens/
-│   └── WelcomeScreen.tsx    # écran d'accueil / connexion (Figma 3:55)
+│   ├── BiometricScreen.tsx  # vérification biométrique / empreinte (Figma 23:1146)
+│   ├── HistoryScreen.tsx    # historique des trajets, liste scrollable (Figma 23:1310)
+│   ├── HomeScreen.tsx       # accueil SafeWalk : carte, trajet, contacts, SOS (Figma 23:1226)
+│   └── WelcomeScreen.tsx    # écran de connexion (Figma 3:55)
 ├── components/
-│   └── Logo.tsx             # logo fleur Link & Walk en SVG (react-native-svg)
+│   ├── Logo.tsx             # logo fleur Link & Walk en SVG (react-native-svg)
+│   ├── TripCard.tsx         # carte d'un trajet passé (avatar, badge, prix, timeline)
+│   └── ScreenSwitcher.tsx   # menu de dev (FAB) pour basculer entre écrans — temporaire
+├── assets/
+│   └── map-bg-2.png         # fond carte de l'accueil (extrait de Figma 23:1227)
 └── theme/
     └── colors.ts            # tokens couleurs issus de Figma
 ```
 
+- **Écran affiché** : pas encore de navigation. `App.tsx` tient un état `current` et
+  monte l'écran choisi via le **menu de dev** `ScreenSwitcher` (bouton flottant en bas
+  à droite). Pour ajouter un écran au sélecteur, l'enregistrer dans l'objet `SCREENS`
+  de `App.tsx`. Ce switcher est temporaire : le retirer quand `expo-router` /
+  React Navigation sera en place.
 - **Tokens design** : toutes les couleurs sont centralisées dans `theme/colors.ts`.
   Ne pas coder de couleur en dur dans les composants — ajouter le token ici.
+- **Icônes** : via `@expo/vector-icons` (Feather / Ionicons), pas de SVG individuels.
 - **Logo** : `components/Logo.tsx` reconstruit la fleur à 6 pétales en `<Svg>` (pas
   d'image bitmap), positions/couleurs extraites du nœud Figma `3:58`. Prop `size`.
-- **Écran** : un seul écran pour l'instant (`WelcomeScreen`). Pas encore de
-  navigation — quand plusieurs écrans seront ajoutés, installer `expo-router` ou
-  `@react-navigation/native`.
+- **Navigation** : toujours pas de navigation (un seul écran monté à la fois). Quand
+  plusieurs écrans devront coexister, installer `expo-router` ou
+  `@react-navigation/native`. Les autres écrans existent dans Figma : Réservation
+  `23:310`, Suivi `23:425`, Profil `23:521`, Matching `23:664`.
 
 ## Design — source Figma
 
 La référence visuelle est le fichier Figma **Link & Walk** :
 
 - Fichier : `70VIHWDwqr7yUAhtmLunBf`
-- Écran d'accueil/connexion : nœud **`3:55`**
+- Accueil SafeWalk (écran actuel) : nœud **`23:1226`**
+  https://www.figma.com/design/70VIHWDwqr7yUAhtmLunBf/Link---Walk?node-id=23-1226&m=dev
+- Historique des trajets : nœud **`23:1310`** (liste seule ; header + bottom nav ajoutés
+  pour la cohérence)
+- Vérification biométrique : nœud **`23:1146`**
+- Écran de connexion : nœud **`3:55`** (= `23:192`, copie identique)
   https://www.figma.com/design/70VIHWDwqr7yUAhtmLunBf/Link---Walk?node-id=3-55&m=dev
 
 Le **serveur MCP Figma** (plugin `figma@claude-plugins-official`) est installé. Pour
