@@ -14,7 +14,8 @@ export type Trip = {
   departurePlace: string;
   departureTime: string;
   arrivalPlace: string;
-  arrivalTime: string;
+  /** Optionnel : non stocké en base (l'API renvoie l'estimation, pas l'heure exacte). */
+  arrivalTime?: string;
 };
 
 /**
@@ -69,7 +70,9 @@ export function TripCard({ trip }: { trip: Trip }) {
             <Text style={styles.stopPlace}>{trip.departurePlace}</Text>
           </View>
           <View style={styles.stop}>
-            <Text style={styles.stopLabel}>Arrivée - {trip.arrivalTime}</Text>
+            <Text style={styles.stopLabel}>
+              {trip.arrivalTime ? `Arrivée - ${trip.arrivalTime}` : 'Arrivée'}
+            </Text>
             <Text style={styles.stopPlace}>{trip.arrivalPlace}</Text>
           </View>
         </View>

@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
-import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { fetchRideHistory } from '../api/rides';
 import { AppHeader } from '../components/AppHeader';
 import { Trip, TripCard } from '../components/TripCard';
 import { colors } from '../theme/colors';
@@ -9,8 +10,8 @@ import { colors } from '../theme/colors';
 const FILTERS = ['Tout', 'Link & Walk', 'Premium'] as const;
 type Filter = (typeof FILTERS)[number];
 
-// Données issues de la maquette Figma (nœud 23:1310).
-const TRIPS: Trip[] = [
+// Données de repli (maquette Figma 23:1310) si l'API n'est pas joignable.
+const FALLBACK_TRIPS: Trip[] = [
   { id: '1', name: 'Alice B.', kind: 'driver', price: '24,50€', date: '16/03/26', departurePlace: 'Gare de Lyon, Paris', departureTime: '21H45', arrivalPlace: 'Rue de la Roquette, 11e', arrivalTime: '22H15' },
   { id: '2', name: 'Julie F.', kind: 'walk', date: '07/03/26', departurePlace: 'Bibliothèque François Mitterrand', departureTime: '22h37', arrivalPlace: "Place d'Italie, Paris", arrivalTime: '23h01' },
   { id: '3', name: 'Lisa I.', kind: 'walk', date: '21/02/26', departurePlace: 'La Défense', departureTime: '21h00', arrivalPlace: 'Gare de Lyon', arrivalTime: '21h30' },
@@ -23,14 +24,35 @@ const TRIPS: Trip[] = [
 
 /**
  * Écran Historique des trajets (Figma 23:1310).
- * Le nœud Figma ne contient que la liste ; le header et la barre de
- * navigation sont repris des autres écrans pour la cohérence (onglet
- * "Historique" actif).
+ * Charge les trajets depuis l'API (GET /rides/history) ; en cas d'erreur
+ * réseau, retombe sur les données de la maquette (FALLBACK_TRIPS).
  */
 export function HistoryScreen() {
   const [filter, setFilter] = useState<Filter>('Tout');
+  const [allTrips, setAllTrips] = useState<Trip[]>(FALLBACK_TRIPS);
+  const [loading, setLoading] = useState(true);
+  const [offline, setOffline] = useState(false);
 
-  const trips = TRIPS.filter((t) => {
+  useEffect(() => {
+    let active = true;
+    fetchRideHistory(1)
+      .then((trips) => {
+        if (!active) return;
+        setAllTrips(trips);
+        setOffline(false);
+      })
+      .catch(() => {
+        if (!active) return;
+        setAllTrips(FALLBACK_TRIPS); // repli hors-ligne
+        setOffline(true);
+      })
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const trips = allTrips.filter((t) => {
     if (filter === 'Link & Walk') return t.kind === 'walk';
     if (filter === 'Premium') return t.kind === 'driver';
     return true;
@@ -54,6 +76,9 @@ export function HistoryScreen() {
           <Text style={styles.title}>Historique</Text>
         </View>
         <Text style={styles.subtitle}>Retrouvez vos trajets et vos chauffeurs.</Text>
+        {offline ? (
+          <Text style={styles.offline}>Mode hors-ligne (données de démonstration)</Text>
+        ) : null}
 
         {/* Barre de filtres */}
         <View style={styles.filters}>
@@ -73,10 +98,12 @@ export function HistoryScreen() {
           })}
         </View>
 
-        {/* Cartes */}
-        {trips.map((trip) => (
-          <TripCard key={trip.id} trip={trip} />
-        ))}
+        {/* Cartes (ou indicateur de chargement) */}
+        {loading ? (
+          <ActivityIndicator color={colors.navy} style={styles.loader} />
+        ) : (
+          trips.map((trip) => <TripCard key={trip.id} trip={trip} />)
+        )}
       </ScrollView>
     </View>
   );
