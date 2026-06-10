@@ -141,6 +141,15 @@ const styles = StyleSheet.create({
     color: colors.bodyText,
     marginTop: 2,
   },
+  offline: {
+    fontSize: 12,
+    color: colors.bodyText,
+    fontStyle: 'italic',
+    marginTop: 2,
+  },
+  loader: {
+    marginTop: 24,
+  },
   filters: {
     flexDirection: 'row',
     gap: 14,

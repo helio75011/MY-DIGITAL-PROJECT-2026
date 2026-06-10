@@ -64,6 +64,9 @@ mobile/
 │   ├── ProfileScreen.tsx    # profil : avatar, stats, menus, déconnexion (Figma 23:1902) — onglet Profile
 │   ├── TrackingScreen.tsx   # suivi de trajet en cours, props pour variante Premium (Figma 23:2512 / 23:2642)
 │   └── WelcomeScreen.tsx    # écran de connexion (Figma 3:55)
+├── api/
+│   ├── client.ts           # client HTTP (API_BASE_URL) vers ../../api
+│   └── rides.ts            # fetchRideHistory() — GET /rides/history
 ├── components/
 │   ├── AppHeader.tsx        # en-tête commun (logo + réglages) — utilisé par tous les écrans applicatifs
 │   ├── BottomNav.tsx        # barre d'onglets commune (Accueil/Historique/Profile/Trajets)
@@ -98,6 +101,17 @@ mobile/
   Driver `Confirmer le trajet`→TrackingPremium.
 - **Menu de dev** : `ScreenSwitcher` reste monté en overlay (`App.tsx`) et saute directement
   à un écran via un `navigationRef`. Le retirer pour la prod.
+
+### Données / API
+
+- Le back-end est l'API Express dans **`../api`** (MySQL `../database`). L'app
+  **ne parle jamais directement à MySQL** : elle passe par HTTP.
+- Client dans `api/` : `API_BASE_URL` doit pointer vers l'**IP du PC** sur le réseau
+  local (comme l'URL `exp://…` de Metro), **pas** `localhost` (qui désigne
+  l'émulateur/BlueStacks lui-même). À adapter si l'IP change.
+- Les écrans branchés sur l'API gardent un **repli** sur des données en dur (mode
+  hors-ligne) pour rester démontrables sans back-end. Exemple : `HistoryScreen`
+  (`fetchRideHistory` → repli `FALLBACK_TRIPS`).
 
 ### Conventions transverses
 
