@@ -1,9 +1,12 @@
 import { Feather, FontAwesome, Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useAuth } from '../auth/AuthContext';
 import { AppHeader } from '../components/AppHeader';
 import { MenuRow } from '../components/MenuRow';
+import type { RootStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 
 /**
@@ -12,6 +15,7 @@ import { colors } from '../theme/colors';
  * "Paramètres de l'application", déconnexion. Barre de nav fournie par les onglets.
  */
 export function ProfileScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user, logout } = useAuth();
   const fullName = user ? `${user.firstName} ${user.lastName}` : 'Profil';
   const verified = user?.isVerified ?? false;
@@ -40,14 +44,29 @@ export function ProfileScreen() {
               <Text style={styles.verifiedText}>Profil vérifié</Text>
             </View>
           ) : (
-            <View style={[styles.verifiedBadge, styles.unverifiedBadge]}>
+            <Pressable
+              style={[styles.verifiedBadge, styles.unverifiedBadge]}
+              onPress={() => navigation.navigate('Kyc')}
+            >
               <Ionicons name="alert-circle" size={20} color="#ffffff" />
               <Text style={styles.verifiedText}>Profil non vérifié</Text>
-            </View>
+            </Pressable>
           )}
           <Text style={styles.name}>{fullName}</Text>
           <Text style={styles.member}>Membre depuis Mars 2026</Text>
         </View>
+
+        {/* Incitation à compléter le KYC tant que le compte n'est pas vérifié */}
+        {!verified ? (
+          <Pressable style={styles.kycBanner} onPress={() => navigation.navigate('Kyc')}>
+            <Ionicons name="shield-checkmark-outline" size={22} color={colors.primary} />
+            <View style={styles.kycBannerText}>
+              <Text style={styles.kycBannerTitle}>Vérifiez votre identité</Text>
+              <Text style={styles.kycBannerSub}>Indispensable pour réserver un trajet en sécurité.</Text>
+            </View>
+            <Feather name="chevron-right" size={20} color={colors.primary} />
+          </Pressable>
+        ) : null}
 
         {/* Stats */}
         <View style={styles.statsRow}>
@@ -134,6 +153,19 @@ const styles = StyleSheet.create({
   unverifiedBadge: {
     backgroundColor: colors.driverRed,
   },
+  kycBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: colors.menuCardBg,
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginTop: 20,
+  },
+  kycBannerText: { flex: 1 },
+  kycBannerTitle: { color: colors.navy, fontSize: 14, fontWeight: '700' },
+  kycBannerSub: { color: colors.bodyText, fontSize: 12, marginTop: 2 },
   verifiedText: {
     color: '#ffffff',
     fontSize: 15,

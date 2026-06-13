@@ -1,0 +1,71 @@
+# Link & Walk — stack de développement complète en une commande :
+#   docker compose up --build
+#
+# Services :
+#   - mysql       : base link_and_walk (schéma + seed importés au 1er démarrage)
+#   - api         : API Express, http://localhost:3000
+#   - phpmyadmin  : interface DB, http://localhost:8080
+#
+# Le mobile (BlueStacks) appelle l'API via l'IP LAN du PC sur le port 3000
+# (API_BASE_URL dans mobile/api/client.ts), pas via localhost.
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: lw_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: link_and_walk
+    ports:
+      - "3306:3306"
+    volumes:
+      - lw_mysql_data:/var/lib/mysql
+      # Scripts exécutés UNE SEULE FOIS, au tout premier démarrage (base vide),
+      # dans l'ordre alphabétique : schéma puis seed.
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build: ./api
+    container_name: lw_api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      DB_HOST: mysql            # nom du service, pas localhost
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: link_and_walk
+      JWT_SECRET: dev-local-secret-2f8a91c4e7b6d350a1f9
+      JWT_EXPIRES_IN: 7d
+    ports:
+      - "3000:3000"
+    volumes:
+      # Persiste les fichiers KYC uploadés hors du conteneur.
+      - ./api/uploads:/app/uploads
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: lw_phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "8080:80"
+
+volumes:
+  lw_mysql_data:

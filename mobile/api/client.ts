@@ -72,4 +72,23 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export const api = { getJson, postJson };
+/**
+ * POST multipart/form-data (upload de fichiers KYC).
+ * On NE fixe PAS le Content-Type : fetch ajoute le boundary lui-même.
+ * On joint quand même le token d'authentification.
+ */
+async function postForm<T>(path: string, form: FormData): Promise<T> {
+  const headers: Record<string, string> = {};
+  const token = authToken;
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'POST',
+    headers,
+    body: form,
+  });
+  if (!res.ok) await parseError(res);
+  return res.json() as Promise<T>;
+}
+
+export const api = { getJson, postJson, postForm };

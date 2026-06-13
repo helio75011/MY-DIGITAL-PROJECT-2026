@@ -1,13 +1,18 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const pool = require('./db');
 const authRouter = require('./routes/auth');
 const ridesRouter = require('./routes/rides');
+const kycRouter = require('./routes/kyc');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Fichiers KYC uploadés, servis en statique (URL : /uploads/<fichier>).
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // Vérifie l'API + la connexion DB.
 app.get('/health', async (_req, res) => {
@@ -21,9 +26,14 @@ app.get('/health', async (_req, res) => {
 
 app.use('/auth', authRouter);
 app.use('/rides', ridesRouter);
+app.use('/kyc', kycRouter);
 
 // Gestion d'erreur centralisée.
 app.use((err, _req, res, _next) => {
+  // Erreurs d'upload (multer) -> 400 explicite.
+  if (err && (err.code === 'LIMIT_FILE_SIZE' || err.message === 'invalid_file_type')) {
+    return res.status(400).json({ error: err.message === 'invalid_file_type' ? 'invalid_file_type' : 'file_too_large' });
+  }
   console.error(err);
   res.status(500).json({ error: 'Internal server error' });
 });

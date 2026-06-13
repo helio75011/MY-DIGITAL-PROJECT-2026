@@ -9,6 +9,8 @@ type AuthContextValue = {
   login: (email: string, password: string) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
+  /** Recharge l'utilisateur courant depuis l'API (ex. après vérification KYC). */
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -52,6 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await authApi.logout();
         setUser(null);
       },
+      refreshUser: async () => setUser(await authApi.me()),
     }),
     [user, loading]
   );

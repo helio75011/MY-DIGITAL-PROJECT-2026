@@ -1,2 +1,6 @@
 node_modules/
 .env
+
+# Fichiers KYC uploadés (on versionne le dossier, pas son contenu)
+uploads/*
+!uploads/.gitkeep

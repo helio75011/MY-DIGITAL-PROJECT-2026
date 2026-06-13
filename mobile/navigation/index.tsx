@@ -10,6 +10,7 @@ import { BookingScreen } from '../screens/BookingScreen';
 import { DriverScreen } from '../screens/DriverScreen';
 import { HistoryScreen } from '../screens/HistoryScreen';
 import { HomeScreen } from '../screens/HomeScreen';
+import { KycScreen } from '../screens/KycScreen';
 import { MatchingScreen } from '../screens/MatchingScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { SignupScreen } from '../screens/SignupScreen';
@@ -85,6 +86,7 @@ export function RootNavigator() {
       {user ? (
         <>
           <Stack.Screen name="MainTabs" component={MainTabs} />
+          <Stack.Screen name="Kyc" component={KycScreen} />
           <Stack.Screen name="Matching" component={MatchingScreen} />
           <Stack.Screen name="Driver" component={DriverScreen} />
           <Stack.Screen name="Tracking" component={TrackingScreen} />

@@ -6,6 +6,7 @@ export type RootStackParamList = {
   Signup: undefined;
   Biometric: undefined;
   MainTabs: undefined;
+  Kyc: undefined;
   Matching: undefined;
   Driver: undefined;
   Tracking: undefined;
