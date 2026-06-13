@@ -1,6 +1,7 @@
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AuthProvider } from './auth/AuthContext';
 import { ScreenSwitcher } from './components/ScreenSwitcher';
 import { RootNavigator } from './navigation';
 import type { RootStackParamList } from './navigation/types';
@@ -23,16 +24,20 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
-      <NavigationContainer ref={navigationRef}>
-        <RootNavigator />
-        <ScreenSwitcher
-          screens={DEV_SCREENS}
-          current={'MainTabs'}
-          onSelect={(screen) => {
-            if (navigationRef.isReady()) navigationRef.navigate(screen);
-          }}
-        />
-      </NavigationContainer>
+      <AuthProvider>
+        <NavigationContainer ref={navigationRef}>
+          <RootNavigator />
+          <ScreenSwitcher
+            screens={DEV_SCREENS}
+            current={'MainTabs'}
+            onSelect={(screen) => {
+              // Le menu de dev ne peut sauter que vers un écran de la pile active
+              // (connecté vs non connecté) ; les sauts hors pile sont ignorés.
+              if (navigationRef.isReady()) navigationRef.navigate(screen);
+            }}
+          />
+        </NavigationContainer>
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }

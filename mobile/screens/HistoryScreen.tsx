@@ -35,7 +35,7 @@ export function HistoryScreen() {
 
   useEffect(() => {
     let active = true;
-    fetchRideHistory(1)
+    fetchRideHistory()
       .then((trips) => {
         if (!active) return;
         setAllTrips(trips);

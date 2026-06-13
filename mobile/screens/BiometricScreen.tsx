@@ -40,10 +40,12 @@ export function BiometricScreen() {
           <Ionicons name="finger-print-outline" size={87} color={colors.text} />
         </Pressable>
 
-        {/* Bouton de connexion */}
+        {/* Bouton de connexion. L'authentification réelle se fait par mot de passe
+            sur l'écran Welcome ; cet écran biométrique est conservé pour la maquette
+            et renvoie vers la connexion. */}
         <Pressable
           style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-          onPress={() => navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] })}
+          onPress={() => navigation.navigate('Welcome')}
         >
           <Text style={styles.buttonText}>Me connecter</Text>
         </Pressable>

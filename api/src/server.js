@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const pool = require('./db');
+const authRouter = require('./routes/auth');
 const ridesRouter = require('./routes/rides');
 
 const app = express();
@@ -18,6 +19,7 @@ app.get('/health', async (_req, res) => {
   }
 });
 
+app.use('/auth', authRouter);
 app.use('/rides', ridesRouter);
 
 // Gestion d'erreur centralisée.

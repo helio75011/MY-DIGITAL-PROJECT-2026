@@ -2,6 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -11,18 +12,47 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ApiError } from '../api/client';
+import { useAuth } from '../auth/AuthContext';
 import { Logo } from '../components/Logo';
 import type { RootStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 
+// Traduit les codes d'erreur de l'API en messages affichables.
+function loginErrorMessage(err: unknown): string {
+  if (err instanceof ApiError) {
+    if (err.code === 'invalid_credentials') return 'E-mail ou mot de passe incorrect.';
+    if (err.code === 'missing_fields') return 'Veuillez renseigner e-mail et mot de passe.';
+  }
+  return 'Connexion impossible. Vérifiez votre réseau et réessayez.';
+}
+
 /**
  * Écran d'accueil / connexion Link & Walk.
- * Fidèle à la maquette Figma (nœud 3:55).
+ * Fidèle à la maquette Figma (nœud 3:55). Le bouton effectue un vrai login :
+ * au succès, le gating de navigation bascule automatiquement vers l'app.
  */
 export function WelcomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [name, setName] = useState('');
+  const { login } = useAuth();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleLogin() {
+    if (submitting) return;
+    setError(null);
+    setSubmitting(true);
+    try {
+      await login(email.trim(), password);
+      // Pas de navigation manuelle : RootNavigator réagit à `user`.
+    } catch (err) {
+      setError(loginErrorMessage(err));
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -49,11 +79,13 @@ export function WelcomeScreen() {
 
           <TextInput
             style={styles.input}
-            placeholder="Votre nom"
+            placeholder="Votre e-mail"
             placeholderTextColor={colors.placeholder}
-            value={name}
-            onChangeText={setName}
+            value={email}
+            onChangeText={setEmail}
             autoCapitalize="none"
+            keyboardType="email-address"
+            textContentType="emailAddress"
             textAlign="center"
           />
 
@@ -65,17 +97,29 @@ export function WelcomeScreen() {
             onChangeText={setPassword}
             secureTextEntry
             textAlign="center"
+            onSubmitEditing={handleLogin}
           />
 
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+
           <Pressable
-            style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-            onPress={() => navigation.navigate('Biometric')}
+            style={({ pressed }) => [
+              styles.button,
+              pressed && styles.buttonPressed,
+              submitting && styles.buttonDisabled,
+            ]}
+            onPress={handleLogin}
+            disabled={submitting}
           >
-            <Text style={styles.buttonText}>Suivant</Text>
+            {submitting ? (
+              <ActivityIndicator color={colors.primaryText} />
+            ) : (
+              <Text style={styles.buttonText}>Se connecter</Text>
+            )}
           </Pressable>
 
           {/* Lien d'inscription */}
-          <Pressable style={styles.signupLink}>
+          <Pressable style={styles.signupLink} onPress={() => navigation.navigate('Signup')}>
             <Text style={styles.signupSmall}>Pas encore de compte ?</Text>
             <Text style={styles.signupBold}>Inscrivez-vous.</Text>
           </Pressable>
@@ -150,10 +194,20 @@ const styles = StyleSheet.create({
   buttonPressed: {
     opacity: 0.85,
   },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
   buttonText: {
     color: colors.primaryText,
     fontSize: 12,
     fontWeight: '500',
+  },
+  error: {
+    color: colors.sosRed,
+    fontSize: 11,
+    textAlign: 'center',
+    marginBottom: 14,
+    maxWidth: 240,
   },
   signupLink: {
     alignItems: 'center',

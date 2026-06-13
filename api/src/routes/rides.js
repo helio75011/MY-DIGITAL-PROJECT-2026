@@ -1,16 +1,17 @@
 const express = require('express');
 const pool = require('../db');
+const requireAuth = require('../middlewares/requireAuth');
 
 const router = express.Router();
 
 /**
- * GET /rides/history?passengerId=1
- * Historique des trajets d'une passagère, avec l'acteur (accompagnatrice /
- * chauffeur), le mode et le tarif. Reconstitue les champs attendus par
- * l'écran HistoryScreen (name, kind, price, date, lieux, heures).
+ * GET /rides/history  (protégé)
+ * Historique des trajets de la passagère connectée (déduite du token), avec
+ * l'acteur (accompagnatrice / chauffeur), le mode et le tarif. Reconstitue les
+ * champs attendus par l'écran HistoryScreen (name, kind, price, date, lieux, heures).
  */
-router.get('/history', async (req, res, next) => {
-  const passengerId = Number(req.query.passengerId) || 1;
+router.get('/history', requireAuth, async (req, res, next) => {
+  const passengerId = req.userId;
 
   try {
     const [rows] = await pool.query(

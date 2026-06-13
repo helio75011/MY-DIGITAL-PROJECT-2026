@@ -1,6 +1,7 @@
 import { Feather, FontAwesome, Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useAuth } from '../auth/AuthContext';
 import { AppHeader } from '../components/AppHeader';
 import { MenuRow } from '../components/MenuRow';
 import { colors } from '../theme/colors';
@@ -11,6 +12,10 @@ import { colors } from '../theme/colors';
  * "Paramètres de l'application", déconnexion. Barre de nav fournie par les onglets.
  */
 export function ProfileScreen() {
+  const { user, logout } = useAuth();
+  const fullName = user ? `${user.firstName} ${user.lastName}` : 'Profil';
+  const verified = user?.isVerified ?? false;
+
   return (
     <View style={styles.root}>
       <AppHeader />
@@ -29,11 +34,18 @@ export function ProfileScreen() {
           <View style={styles.avatar}>
             <Ionicons name="person" size={48} color={colors.statCardBg} />
           </View>
-          <View style={styles.verifiedBadge}>
-            <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
-            <Text style={styles.verifiedText}>Profil vérifié</Text>
-          </View>
-          <Text style={styles.name}>Lucie Berault</Text>
+          {verified ? (
+            <View style={styles.verifiedBadge}>
+              <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
+              <Text style={styles.verifiedText}>Profil vérifié</Text>
+            </View>
+          ) : (
+            <View style={[styles.verifiedBadge, styles.unverifiedBadge]}>
+              <Ionicons name="alert-circle" size={20} color="#ffffff" />
+              <Text style={styles.verifiedText}>Profil non vérifié</Text>
+            </View>
+          )}
+          <Text style={styles.name}>{fullName}</Text>
           <Text style={styles.member}>Membre depuis Mars 2026</Text>
         </View>
 
@@ -68,7 +80,7 @@ export function ProfileScreen() {
         </View>
 
         {/* Déconnexion */}
-        <Pressable style={styles.logout}>
+        <Pressable style={styles.logout} onPress={() => logout()}>
           <Text style={styles.logoutText}>Déconnexion</Text>
         </Pressable>
       </ScrollView>
@@ -118,6 +130,9 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 30,
     marginTop: -10,
+  },
+  unverifiedBadge: {
+    backgroundColor: colors.driverRed,
   },
   verifiedText: {
     color: '#ffffff',

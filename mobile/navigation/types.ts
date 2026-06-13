@@ -3,6 +3,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 // Écrans de la pile racine (onboarding + flux hors-onglets).
 export type RootStackParamList = {
   Welcome: undefined;
+  Signup: undefined;
   Biometric: undefined;
   MainTabs: undefined;
   Matching: undefined;
