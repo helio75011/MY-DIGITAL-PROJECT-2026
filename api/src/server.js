@@ -7,6 +7,8 @@ const authRouter = require('./routes/auth');
 const ridesRouter = require('./routes/rides');
 const bookingsRouter = require('./routes/bookings');
 const trackingRouter = require('./routes/tracking');
+const ratingsRouter = require('./routes/ratings');
+const adminRouter = require('./routes/admin');
 const kycRouter = require('./routes/kyc');
 
 const app = express();
@@ -27,9 +29,14 @@ app.get('/health', async (_req, res) => {
 });
 
 app.use('/auth', authRouter);
+// Admin monté en premier : ses routes gèrent leur propre auth (la page /admin est
+// publique). Les routeurs ci-dessous appliquent requireAuth globalement via
+// router.use(), ce qui intercepterait /admin s'ils passaient avant.
+app.use('/', adminRouter); // /admin (dashboard), /admin/incidents
 app.use('/rides', ridesRouter);
 app.use('/', bookingsRouter); // POST /rides, GET /matching, POST /bookings
 app.use('/', trackingRouter); // /rides/:ref/track, /rides/:ref/complete, /incidents
+app.use('/', ratingsRouter); // POST /ratings
 app.use('/kyc', kycRouter);
 
 // Gestion d'erreur centralisée.

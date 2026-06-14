@@ -65,7 +65,7 @@ export function MatchingScreen() {
     setBooking(c.userId);
     try {
       await createBooking({ rideRef, actorId: c.userId, mode: 'solidaire', price: 0 });
-      navigation.navigate('Tracking', { rideRef, name: c.name, startPoint, endPoint });
+      navigation.navigate('Tracking', { rideRef, actorId: c.userId, name: c.name, startPoint, endPoint });
     } catch {
       Alert.alert('Erreur', "La réservation a échoué. Réessayez.");
     } finally {

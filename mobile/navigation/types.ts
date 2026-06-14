@@ -16,6 +16,8 @@ export type RootStackParamList = {
 // Params du suivi : référence du trajet à suivre (absente = mode démo).
 export type TrackingParams = {
   rideRef?: string;
+  /** Identifiant de l'acteur (pour la notation post-trajet). */
+  actorId?: number;
   name?: string;
   startPoint?: string;
   endPoint?: string;

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Link &amp; Walk — Dashboard SOS</title>
+  <style>
+    :root { --navy:#000666; --red:#ba1a1a; --bg:#f4f5fa; --card:#fff; --muted:#6b7280; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:#1a1c1d; }
+    header { background:var(--navy); color:#fff; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; }
+    header h1 { font-size:18px; margin:0; }
+    .status { font-size:13px; opacity:.85; }
+    main { max-width:1000px; margin:24px auto; padding:0 16px; }
+    .login { background:var(--card); border-radius:12px; padding:24px; max-width:360px; margin:64px auto; box-shadow:0 4px 20px rgba(0,6,102,.08); }
+    .login h2 { margin:0 0 16px; color:var(--navy); }
+    .login input { width:100%; padding:10px 12px; margin-bottom:12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; }
+    .login button, .btn { background:var(--navy); color:#fff; border:0; border-radius:8px; padding:10px 16px; font-size:14px; cursor:pointer; }
+    .login .err { color:var(--red); font-size:13px; min-height:18px; }
+    .toolbar { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+    .count { font-weight:700; color:var(--red); }
+    table { width:100%; border-collapse:collapse; background:var(--card); border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,6,102,.06); }
+    th, td { text-align:left; padding:12px 14px; font-size:14px; border-bottom:1px solid #eef0f4; }
+    th { background:#fafbff; color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.5px; }
+    tr.sos { background:#fff5f5; }
+    .badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:12px; font-weight:700; }
+    .badge.SOS { background:#ffe2e2; color:var(--red); }
+    .badge.DELAY { background:#fff3cd; color:#7a5a00; }
+    .badge.MALAISE { background:#e0e7ff; color:#3730a3; }
+    .badge.OTHER { background:#e5e7eb; color:#374151; }
+    .resolved { opacity:.55; }
+    .resolve-btn { background:#07521d; }
+    .hidden { display:none; }
+    .empty { text-align:center; color:var(--muted); padding:40px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🌸 Link &amp; Walk — Centre de sécurité</h1>
+    <span class="status" id="status"></span>
+  </header>
+
+  <main>
+    <!-- Connexion admin -->
+    <div class="login" id="login">
+      <h2>Connexion modérateur</h2>
+      <input id="email" type="email" placeholder="E-mail" value="admin@linkandwalk.fr" />
+      <input id="password" type="password" placeholder="Mot de passe" />
+      <div class="err" id="loginErr"></div>
+      <button onclick="login()">Se connecter</button>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="hidden">
+      <div class="toolbar">
+        <span><span class="count" id="openCount">0</span> alerte(s) en cours</span>
+        <span class="status" id="refreshInfo" style="color:var(--muted)">Actualisation auto toutes les 5 s</span>
+      </div>
+      <table id="table">
+        <thead>
+          <tr>
+            <th>Type</th><th>Passagère</th><th>Téléphone</th><th>Trajet</th><th>Heure</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div class="empty hidden" id="empty">Aucun incident enregistré.</div>
+    </div>
+  </main>
+
+  <script>
+    let token = null;
+
+    async function login() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const err = document.getElementById('loginErr');
+      err.textContent = '';
+      try {
+        const res = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'login_failed');
+        if (data.user.role !== 'ADMIN') throw new Error('Compte non administrateur.');
+        token = data.token;
+        document.getElementById('login').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        document.getElementById('status').textContent = 'Connecté · ' + data.user.email;
+        load();
+        setInterval(load, 5000);
+      } catch (e) {
+        err.textContent = e.message === 'invalid_credentials'
+          ? 'E-mail ou mot de passe incorrect.'
+          : e.message;
+      }
+    }
+
+    async function load() {
+      try {
+        const res = await fetch('/admin/incidents', {
+          headers: { Authorization: 'Bearer ' + token },
+        });
+        if (!res.ok) return;
+        const items = await res.json();
+        render(items);
+      } catch {}
+    }
+
+    function render(items) {
+      const tbody = document.getElementById('rows');
+      const empty = document.getElementById('empty');
+      const table = document.getElementById('table');
+      tbody.innerHTML = '';
+
+      const open = items.filter(i => !i.resolved).length;
+      document.getElementById('openCount').textContent = open;
+
+      if (items.length === 0) {
+        table.classList.add('hidden');
+        empty.classList.remove('hidden');
+        return;
+      }
+      table.classList.remove('hidden');
+      empty.classList.add('hidden');
+
+      for (const i of items) {
+        const tr = document.createElement('tr');
+        if (i.type === 'SOS' && !i.resolved) tr.className = 'sos';
+        if (i.resolved) tr.className = 'resolved';
+        const when = new Date(i.at).toLocaleString('fr-FR');
+        const trip = i.rideRef ? (i.startPoint || '?') + ' → ' + (i.endPoint || '?') : '—';
+        tr.innerHTML =
+          '<td><span class="badge ' + i.type + '">' + i.type + '</span></td>' +
+          '<td>' + escapeHtml(i.reporter) + '</td>' +
+          '<td>' + escapeHtml(i.reporterPhone || '—') + '</td>' +
+          '<td>' + escapeHtml(trip) + '</td>' +
+          '<td>' + when + '</td>' +
+          '<td>' + (i.resolved
+            ? '✓ traité'
+            : '<button class="btn resolve-btn" onclick="resolve(\'' + i.ref + '\')">Marquer traité</button>') +
+          '</td>';
+        tbody.appendChild(tr);
+      }
+    }
+
+    async function resolve(ref) {
+      await fetch('/admin/incidents/' + ref + '/resolve', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token },
+      });
+      load();
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c =>
+        ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+    }
+  </script>
+</body>
+</html>

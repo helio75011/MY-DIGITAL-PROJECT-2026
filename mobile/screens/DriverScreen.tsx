@@ -53,7 +53,7 @@ export function DriverScreen() {
         mode: 'premium',
         price: PREMIUM_PRICE,
       });
-      navigation.navigate('TrackingPremium', { rideRef, name: driver.name, startPoint, endPoint });
+      navigation.navigate('TrackingPremium', { rideRef, actorId: driver.userId, name: driver.name, startPoint, endPoint });
     } catch {
       Alert.alert('Erreur', "La confirmation a échoué. Réessayez.");
     } finally {

@@ -8,6 +8,7 @@ import { ImageBackground, Linking, Modal, Pressable, Share, StyleSheet, Text, Vi
 import { completeRide, reportIncident, sendTrackPoint } from '../api/tracking';
 import { AppHeader } from '../components/AppHeader';
 import { BottomNav } from '../components/BottomNav';
+import { RatingModal } from '../components/RatingModal';
 import { goToTab } from '../navigation/helpers';
 import type { RootStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
@@ -54,6 +55,7 @@ export function TrackingScreen({
   const [progress, setProgress] = useState(rideRef ? 0 : progressProp);
   const [sosVisible, setSosVisible] = useState(false);
   const [sosSending, setSosSending] = useState(false);
+  const [ratingVisible, setRatingVisible] = useState(false);
   const lastPos = useRef<{ latitude: number; longitude: number } | null>(null);
 
   // Suivi temps réel : envoie la position GPS périodiquement tant que le trajet
@@ -101,12 +103,13 @@ export function TrackingScreen({
     };
   }, [rideRef]);
 
-  // À l'arrivée (100 %), clôt le trajet une seule fois.
+  // À l'arrivée (100 %), clôt le trajet une seule fois puis propose la notation.
   const completed = useRef(false);
   useEffect(() => {
     if (rideRef && progress >= 100 && !completed.current) {
       completed.current = true;
       completeRide(rideRef, lastPos.current ?? undefined).catch(() => {});
+      setRatingVisible(true);
     }
   }, [progress, rideRef]);
 
@@ -250,6 +253,15 @@ export function TrackingScreen({
           </View>
         </View>
       </Modal>
+
+      {/* Notation post-trajet (à la clôture, 100 %) */}
+      <RatingModal
+        visible={ratingVisible}
+        ratedId={route.params?.actorId ?? null}
+        name={displayName}
+        onClose={() => setRatingVisible(false)}
+        onDone={() => goToTab(navigation, 'Historique')}
+      />
     </View>
   );
 }
