@@ -1,10 +1,12 @@
 import { Feather, FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors } from '../theme/colors';
 
 export type Companion = {
   id: string;
+  /** Identifiant réel de l'acteur côté API (pour créer la réservation). */
+  userId?: number;
   name: string;
   rating: string;
   time: string;
@@ -16,7 +18,15 @@ export type Companion = {
  * avatar + pastille "disponible", nom, note (cœur + valeur),
  * temps + distance, bouton "Sélectionner".
  */
-export function CompanionCard({ companion, onSelect }: { companion: Companion; onSelect?: () => void }) {
+export function CompanionCard({
+  companion,
+  onSelect,
+  loading,
+}: {
+  companion: Companion;
+  onSelect?: () => void;
+  loading?: boolean;
+}) {
   return (
     <View style={styles.card}>
       {/* Avatar + pastille disponible */}
@@ -48,8 +58,12 @@ export function CompanionCard({ companion, onSelect }: { companion: Companion; o
           <FontAwesome name="heart" size={13} color={colors.heartRed} />
           <Text style={styles.ratingText}>{companion.rating}</Text>
         </View>
-        <Pressable style={styles.selectBtn} onPress={onSelect}>
-          <Text style={styles.selectText}>Sélectionner</Text>
+        <Pressable style={[styles.selectBtn, loading && styles.selectBtnLoading]} onPress={onSelect} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ) : (
+            <Text style={styles.selectText}>Sélectionner</Text>
+          )}
         </Pressable>
       </View>
     </View>
@@ -131,6 +145,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 17,
     paddingVertical: 8,
     borderRadius: 13,
+    minWidth: 96,
+    alignItems: 'center',
+  },
+  selectBtnLoading: {
+    opacity: 0.7,
   },
   selectText: {
     color: '#ffffff',

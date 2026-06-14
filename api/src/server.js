@@ -5,6 +5,8 @@ const cors = require('cors');
 const pool = require('./db');
 const authRouter = require('./routes/auth');
 const ridesRouter = require('./routes/rides');
+const bookingsRouter = require('./routes/bookings');
+const trackingRouter = require('./routes/tracking');
 const kycRouter = require('./routes/kyc');
 
 const app = express();
@@ -26,6 +28,8 @@ app.get('/health', async (_req, res) => {
 
 app.use('/auth', authRouter);
 app.use('/rides', ridesRouter);
+app.use('/', bookingsRouter); // POST /rides, GET /matching, POST /bookings
+app.use('/', trackingRouter); // /rides/:ref/track, /rides/:ref/complete, /incidents
 app.use('/kyc', kycRouter);
 
 // Gestion d'erreur centralisée.

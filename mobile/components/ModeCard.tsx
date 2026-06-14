@@ -1,6 +1,6 @@
 import { Feather, FontAwesome5 } from '@expo/vector-icons';
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors } from '../theme/colors';
 
 type Props = {
@@ -11,6 +11,8 @@ type Props = {
   /** "15,00€" pour premium ; pour solidaire on affiche "GRATUIT". */
   price?: string;
   onPress?: () => void;
+  /** Affiche un spinner et désactive la carte pendant la création du trajet. */
+  loading?: boolean;
 };
 
 /**
@@ -18,19 +20,28 @@ type Props = {
  * variant "solidaire" = fond violet clair, badge GRATUIT.
  * variant "premium"   = fond bleu marine, prix rose.
  */
-export function ModeCard({ variant, title, description, eta, price, onPress }: Props) {
+export function ModeCard({ variant, title, description, eta, price, onPress, loading }: Props) {
   const isPremium = variant === 'premium';
   const textColor = isPremium ? '#ffffff' : colors.routeValue;
   const descColor = isPremium ? colors.onDarkDesc : colors.bodyText;
 
   return (
     <Pressable
-      style={[styles.card, { backgroundColor: isPremium ? colors.modePremiumBg : colors.modeSolidaireBg }]}
+      style={[
+        styles.card,
+        { backgroundColor: isPremium ? colors.modePremiumBg : colors.modeSolidaireBg },
+        loading && styles.cardLoading,
+      ]}
       onPress={onPress}
+      disabled={loading}
     >
-      {/* Pastille d'icône */}
+      {/* Pastille d'icône (spinner pendant la création du trajet) */}
       <View style={styles.iconTile}>
-        <FontAwesome5 name="female" size={20} color="#ffffff" />
+        {loading ? (
+          <ActivityIndicator size="small" color="#ffffff" />
+        ) : (
+          <FontAwesome5 name="female" size={20} color="#ffffff" />
+        )}
       </View>
 
       <View style={styles.body}>
@@ -60,6 +71,9 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     padding: 22,
     gap: 20,
+  },
+  cardLoading: {
+    opacity: 0.7,
   },
   iconTile: {
     width: 40,

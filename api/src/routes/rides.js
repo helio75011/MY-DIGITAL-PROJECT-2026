@@ -19,7 +19,7 @@ router.get('/history', requireAuth, async (req, res, next) => {
       SELECT
         r.ride_ref                                   AS id,
         CONCAT(u.first_name, ' ', u.last_name)       AS name,
-        CASE WHEN b.option = 'solidaire' THEN 'walk'
+        CASE WHEN b.\`option\` = 'solidaire' THEN 'walk'
              ELSE 'driver' END                       AS kind,
         b.applied_price                              AS price,
         DATE_FORMAT(r.creation_date, '%d/%m/%y')     AS date,

@@ -1,21 +1,87 @@
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { getCurrentPosition, haversineKm, type GeoPoint } from '../api/location';
+import { createRide, type RideMode } from '../api/rides';
 import { AppHeader } from '../components/AppHeader';
 import { ModeCard } from '../components/ModeCard';
-import { RouteCard } from '../components/RouteCard';
 import { colors } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 
 /**
  * Écran "Réserver un trajet" (onglet "Trajets", Figma 23:2060).
- * Carte itinéraire (position → destination), choix du mode
- * (Accompagnement Solidaire → Matching / Chauffeur Premium → Driver).
+ * Récupère la position GPS réelle (expo-location), laisse saisir la destination,
+ * crée un trajet (POST /rides) puis ouvre Matching (solidaire) ou Driver (premium)
+ * avec la référence du trajet.
  */
 export function BookingScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const [origin, setOrigin] = useState<GeoPoint | null>(null);
+  const [originLabel, setOriginLabel] = useState('');
+  const [destination, setDestination] = useState('');
+  const [locating, setLocating] = useState(true);
+  const [submitting, setSubmitting] = useState<RideMode | null>(null);
+
+  // Tente de récupérer la position GPS et de remplir le champ de départ.
+  async function locate() {
+    setLocating(true);
+    try {
+      const p = await getCurrentPosition();
+      setOrigin(p);
+      setOriginLabel(p.label);
+    } catch {
+      // Permission refusée ou GPS indisponible : on laisse l'utilisatrice saisir.
+      setOrigin(null);
+    } finally {
+      setLocating(false);
+    }
+  }
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      if (active) await locate();
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function startRide(mode: RideMode) {
+    if (submitting) return;
+    if (locating) {
+      Alert.alert('Position', 'Localisation en cours, patientez un instant.');
+      return;
+    }
+    if (!originLabel.trim()) {
+      Alert.alert('Départ', 'Indiquez votre point de départ.');
+      return;
+    }
+    if (!destination.trim()) {
+      Alert.alert('Destination', 'Indiquez votre destination.');
+      return;
+    }
+
+    setSubmitting(mode);
+    try {
+      // Distance estimée si on a un point d'origine GPS (sinon laissée vide).
+      const distanceKm = origin ? haversineKm(origin, { ...origin, label: '' }) : undefined;
+      const { rideRef } = await createRide({
+        startPoint: originLabel,
+        endPoint: destination.trim(),
+        distanceKm,
+      });
+      const params = { rideRef, mode, startPoint: originLabel, endPoint: destination.trim() };
+      navigation.navigate(mode === 'solidaire' ? 'Matching' : 'Driver', params);
+    } catch {
+      Alert.alert('Erreur', "Impossible de créer le trajet. Réessayez.");
+    } finally {
+      setSubmitting(null);
+    }
+  }
 
   return (
     <View style={styles.root}>
@@ -30,9 +96,43 @@ export function BookingScreen() {
           <Text style={styles.pageTitle}>Réserver un trajet</Text>
         </View>
 
-        {/* Carte itinéraire */}
-        <View style={styles.routeWrap}>
-          <RouteCard position="62 Rue de la Paix, Paris" destination="Gare du Nord, 75010" />
+        {/* Itinéraire : position GPS réelle + destination saisie (Figma 23:2065) */}
+        <View style={styles.routeCard}>
+          <View style={styles.routeRow}>
+            <Feather name="crosshair" size={20} color={colors.routeValue} />
+            <View style={styles.routeField}>
+              <Text style={styles.routeLabel}>MA POSITION</Text>
+              {locating ? (
+                <ActivityIndicator size="small" color={colors.routeLabel} style={styles.routeLoader} />
+              ) : (
+                <TextInput
+                  style={styles.routeInput}
+                  value={originLabel}
+                  onChangeText={setOriginLabel}
+                  placeholder="Votre point de départ"
+                  placeholderTextColor={colors.placeholder}
+                />
+              )}
+            </View>
+            {/* Relancer la géolocalisation */}
+            <Pressable hitSlop={8} onPress={locate} disabled={locating}>
+              <Feather name="navigation" size={18} color={colors.routeLabel} />
+            </Pressable>
+          </View>
+          <View style={styles.routeDivider} />
+          <View style={styles.routeRow}>
+            <Ionicons name="location-sharp" size={20} color={colors.routeValue} />
+            <View style={styles.routeField}>
+              <Text style={styles.routeLabel}>DESTINATION</Text>
+              <TextInput
+                style={styles.routeInput}
+                value={destination}
+                onChangeText={setDestination}
+                placeholder="Où allez-vous ?"
+                placeholderTextColor={colors.placeholder}
+              />
+            </View>
+          </View>
         </View>
 
         {/* Modes de trajet */}
@@ -44,7 +144,8 @@ export function BookingScreen() {
             title="Accompagnement Solidaire"
             description="Profils vérifiés, femme à femme. Idéal pour les trajets quotidiens."
             eta="21 min"
-            onPress={() => navigation.navigate('Matching')}
+            onPress={() => startRide('solidaire')}
+            loading={submitting === 'solidaire'}
           />
           <ModeCard
             variant="premium"
@@ -52,7 +153,8 @@ export function BookingScreen() {
             description="Agent certifié avec véhicule de veille. Protection maximale immédiate."
             eta="12 min"
             price="15,00€"
-            onPress={() => navigation.navigate('Driver')}
+            onPress={() => startRide('premium')}
+            loading={submitting === 'premium'}
           />
         </View>
       </ScrollView>
@@ -81,8 +183,43 @@ const styles = StyleSheet.create({
     color: colors.navy,
     letterSpacing: -0.75,
   },
-  routeWrap: {
+  routeCard: {
     marginTop: 20,
+    backgroundColor: colors.routeFieldBg, // gris clair #eeeef0 (Figma 23:2066)
+    borderRadius: 10,
+    paddingHorizontal: 22,
+    paddingVertical: 12,
+  },
+  routeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    paddingVertical: 6,
+  },
+  routeField: {
+    flex: 1,
+  },
+  routeLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.routeLabel, // violet #6d4ea2
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  routeInput: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.routeValue, // #1a1c1d (texte saisi visible)
+    paddingVertical: 2,
+  },
+  routeLoader: {
+    alignSelf: 'flex-start',
+    marginVertical: 4,
+  },
+  routeDivider: {
+    height: 1,
+    backgroundColor: 'rgba(0,0,0,0.12)',
+    marginLeft: 30,
   },
   sectionTitle: {
     color: colors.navy,

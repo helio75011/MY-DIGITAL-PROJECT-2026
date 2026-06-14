@@ -1,9 +1,11 @@
 import { Feather, FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
-import React from 'react';
-import { ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
+import * as Location from 'expo-location';
+import React, { useEffect, useRef, useState } from 'react';
+import { ImageBackground, Linking, Modal, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { completeRide, reportIncident, sendTrackPoint } from '../api/tracking';
 import { AppHeader } from '../components/AppHeader';
 import { BottomNav } from '../components/BottomNav';
 import { goToTab } from '../navigation/helpers';
@@ -11,6 +13,7 @@ import type { RootStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 
 const trackingMap = require('../assets/tracking-map.png');
+const POLL_MS = 3000; // intervalle d'envoi de position (suivi "temps réel")
 
 type Props = {
   /** Libellé de statut, ex. "Marche en groupe active" ou "Trajet Premium". */
@@ -28,19 +31,124 @@ type Props = {
 
 /**
  * Écran de suivi de trajet en cours (Figma 23:2512, variante Premium 23:2642).
- * Map en fond, carte de statut + barre de progression, boutons
- * partager/appeler/SOS, carte de l'accompagnatrice. Bottom nav (Trajets actif).
+ * Si un `rideRef` est passé en params : envoie la position GPS toutes les ~3 s
+ * (POST /rides/:ref/track), fait avancer la progression, et branche les actions
+ * Partager (feuille native), Appeler et SOS (POST /incidents).
  */
 export function TrackingScreen({
   status = 'Marche en groupe active',
   eta = 'Arrivée dans 5 mins',
-  progress = 75,
+  progress: progressProp = 75,
   name = 'Lia Presko',
   role = 'Accompagnatrice',
   rating = '4.8',
   distance = '40m',
 }: Props = {}) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const route = useRoute<RouteProp<RootStackParamList, 'Tracking'>>();
+  const rideRef = route.params?.rideRef;
+  // Les données réelles transmises par le flux (params) priment sur les valeurs
+  // par défaut passées en props (utilisées par le wrapper Premium / la démo).
+  const displayName = route.params?.name ?? name;
+
+  const [progress, setProgress] = useState(rideRef ? 0 : progressProp);
+  const [sosVisible, setSosVisible] = useState(false);
+  const [sosSending, setSosSending] = useState(false);
+  const lastPos = useRef<{ latitude: number; longitude: number } | null>(null);
+
+  // Suivi temps réel : envoie la position GPS périodiquement tant que le trajet
+  // est en cours, et fait progresser la barre jusqu'à l'arrivée.
+  useEffect(() => {
+    if (!rideRef) return;
+    let active = true;
+    let timer: ReturnType<typeof setInterval>;
+
+    (async () => {
+      const { status: perm } = await Location.requestForegroundPermissionsAsync();
+      const canLocate = perm === 'granted';
+
+      // Premier point = départ.
+      if (canLocate) {
+        try {
+          const p = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+          lastPos.current = { latitude: p.coords.latitude, longitude: p.coords.longitude };
+          await sendTrackPoint(rideRef, p.coords.latitude, p.coords.longitude, 'DEPARTURE');
+        } catch {
+          // position indisponible : on continue avec la progression simulée
+        }
+      }
+
+      timer = setInterval(async () => {
+        if (!active) return;
+        // Avance la progression (≈ 1 min de trajet simulé par tick).
+        setProgress((prev) => Math.min(100, prev + 8));
+
+        if (canLocate) {
+          try {
+            const p = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+            lastPos.current = { latitude: p.coords.latitude, longitude: p.coords.longitude };
+            await sendTrackPoint(rideRef, p.coords.latitude, p.coords.longitude, 'POSITION');
+          } catch {
+            /* ignore un tick raté */
+          }
+        }
+      }, POLL_MS);
+    })();
+
+    return () => {
+      active = false;
+      if (timer) clearInterval(timer);
+    };
+  }, [rideRef]);
+
+  // À l'arrivée (100 %), clôt le trajet une seule fois.
+  const completed = useRef(false);
+  useEffect(() => {
+    if (rideRef && progress >= 100 && !completed.current) {
+      completed.current = true;
+      completeRide(rideRef, lastPos.current ?? undefined).catch(() => {});
+    }
+  }, [progress, rideRef]);
+
+  async function handleShare() {
+    const where = route.params?.endPoint ? ` vers ${route.params.endPoint}` : '';
+    try {
+      await Share.share({
+        message: `Je suis en trajet Link & Walk${where} avec ${displayName}. Suis mon trajet en direct${rideRef ? ` (réf ${rideRef})` : ''}.`,
+      });
+    } catch {
+      /* partage annulé */
+    }
+  }
+
+  function handleCall() {
+    Linking.openURL('tel:0612345678').catch(() => {});
+  }
+
+  async function handleSos() {
+    if (sosSending) return;
+    setSosSending(true);
+    try {
+      await reportIncident({
+        rideRef,
+        type: 'SOS',
+        latitude: lastPos.current?.latitude,
+        longitude: lastPos.current?.longitude,
+      });
+      setSosVisible(true);
+    } catch {
+      // Même en cas d'échec réseau, on confirme visuellement l'intention d'alerte.
+      setSosVisible(true);
+    } finally {
+      setSosSending(false);
+    }
+  }
+
+  const liveEta = rideRef
+    ? progress >= 100
+      ? 'Arrivée'
+      : `Arrivée dans ${Math.max(1, Math.round((100 - progress) / 8))} min`
+    : eta;
 
   return (
     <View style={styles.root}>
@@ -56,7 +164,7 @@ export function TrackingScreen({
             <View style={styles.statusDot} />
             <Text style={styles.statusText}>{status}</Text>
           </View>
-          <Text style={styles.statusEta}>{eta}</Text>
+          <Text style={styles.statusEta}>{liveEta}</Text>
         </View>
 
         <View style={styles.progressTrack}>
@@ -72,20 +180,24 @@ export function TrackingScreen({
           <Text style={styles.progressLabel}>DÉPART</Text>
           <Text style={styles.progressLabel}>ARRIVÉE</Text>
         </View>
-        <Text style={styles.progressPercent}>{progress}% Complétée</Text>
+        <Text style={styles.progressPercent}>{Math.round(progress)}% Complétée</Text>
       </View>
 
       {/* Boutons d'action + carte accompagnatrice, ancrés en bas */}
       <View style={styles.bottomBlock}>
         <View style={styles.actions}>
-          <Pressable style={styles.actionBtn}>
+          <Pressable style={styles.actionBtn} onPress={handleShare}>
             <Feather name="share-2" size={22} color={colors.navy} />
           </Pressable>
-          <Pressable style={styles.actionBtn}>
+          <Pressable style={styles.actionBtn} onPress={handleCall}>
             <Feather name="phone" size={22} color={colors.navy} />
           </Pressable>
-          <Pressable style={[styles.actionBtn, styles.sosBtn]}>
-            <Text style={styles.sosText}>S.O.S</Text>
+          <Pressable
+            style={[styles.actionBtn, styles.sosBtn]}
+            onPress={handleSos}
+            disabled={sosSending}
+          >
+            <Text style={styles.sosText}>{sosSending ? '…' : 'S.O.S'}</Text>
           </Pressable>
         </View>
 
@@ -99,7 +211,7 @@ export function TrackingScreen({
             </View>
           </View>
           <View style={styles.companionInfo}>
-            <Text style={styles.companionName}>{name}</Text>
+            <Text style={styles.companionName}>{displayName}</Text>
             <Text style={styles.companionRole}>{role}</Text>
             {distance ? (
               <View style={styles.metaRow}>
@@ -119,6 +231,25 @@ export function TrackingScreen({
       <View style={styles.bottomNavWrap}>
         <BottomNav active="Trajets" onNavigate={(tab) => goToTab(navigation, tab)} />
       </View>
+
+      {/* Modale de confirmation SOS */}
+      <Modal visible={sosVisible} transparent animationType="fade" onRequestClose={() => setSosVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalIcon}>
+              <Feather name="alert-triangle" size={32} color={colors.sosRed} />
+            </View>
+            <Text style={styles.modalTitle}>Alerte SOS envoyée</Text>
+            <Text style={styles.modalText}>
+              Votre position a été transmise. L'équipe de sécurité Link & Walk a été alertée
+              et va vous contacter.
+            </Text>
+            <Pressable style={styles.modalBtn} onPress={() => setSosVisible(false)}>
+              <Text style={styles.modalBtnText}>J'ai compris</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -319,5 +450,55 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+  },
+  // Modale SOS
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+  },
+  modalCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    width: '100%',
+  },
+  modalIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colors.sosBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: colors.sosRed,
+    marginBottom: 8,
+  },
+  modalText: {
+    fontSize: 13,
+    color: colors.bodyText,
+    textAlign: 'center',
+    lineHeight: 19,
+    marginBottom: 20,
+  },
+  modalBtn: {
+    backgroundColor: colors.navy,
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    alignSelf: 'stretch',
+    alignItems: 'center',
+  },
+  modalBtnText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

@@ -7,10 +7,26 @@ export type RootStackParamList = {
   Biometric: undefined;
   MainTabs: undefined;
   Kyc: undefined;
-  Matching: undefined;
-  Driver: undefined;
-  Tracking: undefined;
-  TrackingPremium: undefined;
+  Matching: RideFlowParams;
+  Driver: RideFlowParams;
+  Tracking: TrackingParams | undefined;
+  TrackingPremium: TrackingParams | undefined;
+};
+
+// Params du suivi : référence du trajet à suivre (absente = mode démo).
+export type TrackingParams = {
+  rideRef?: string;
+  name?: string;
+  startPoint?: string;
+  endPoint?: string;
+};
+
+// Paramètres transmis aux écrans du flux de réservation (depuis Booking).
+export type RideFlowParams = {
+  rideRef: string;
+  mode: 'solidaire' | 'premium';
+  startPoint: string;
+  endPoint: string;
 };
 
 // Onglets de la barre inférieure.

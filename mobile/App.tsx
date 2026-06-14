@@ -10,12 +10,14 @@ import type { RootStackParamList } from './navigation/types';
 const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
 // Écrans atteignables depuis le menu de dev (ScreenSwitcher).
-const DEV_SCREENS: (keyof RootStackParamList)[] = [
+// Matching/Driver sont exclus : ils exigent des params (rideRef, itinéraire)
+// fournis par le flux de réservation et ne peuvent pas être ouverts directement.
+// Ce type ne liste que des écrans SANS params (navigate sans 2e argument).
+type DevScreen = 'Welcome' | 'Biometric' | 'MainTabs' | 'Tracking' | 'TrackingPremium';
+const DEV_SCREENS: DevScreen[] = [
   'Welcome',
   'Biometric',
   'MainTabs',
-  'Matching',
-  'Driver',
   'Tracking',
   'TrackingPremium',
 ];

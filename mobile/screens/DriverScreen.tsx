@@ -1,8 +1,9 @@
 import { Feather, FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React from 'react';
-import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { createBooking, fetchMatching, type MatchActor } from '../api/rides';
 import { AppHeader } from '../components/AppHeader';
 import { BottomNav } from '../components/BottomNav';
 import { RouteCard } from '../components/RouteCard';
@@ -11,14 +12,60 @@ import type { RootStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 
 const tripMap = require('../assets/trip-map.png');
+const PREMIUM_PRICE = 15.0;
 
 /**
  * Écran "Chauffeur premium" (Figma 23:2360) — confirmation d'un trajet :
- * itinéraire, carte de suivi, profil chauffeur, infos véhicule/sécurité,
- * moyen de paiement et bouton de confirmation (→ Tracking).
+ * charge le meilleur chauffeur disponible (GET /matching?mode=premium), affiche
+ * son profil/véhicule réels, puis crée la réservation (POST /bookings → Tracking).
  */
 export function DriverScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const route = useRoute<RouteProp<RootStackParamList, 'Driver'>>();
+  const { rideRef, startPoint, endPoint } = route.params;
+
+  const [driver, setDriver] = useState<MatchActor | null>(null);
+  const [confirming, setConfirming] = useState(false);
+
+  // Charge le chauffeur le mieux noté disponible.
+  useEffect(() => {
+    let active = true;
+    fetchMatching('premium')
+      .then((actors) => active && setDriver(actors[0] ?? null))
+      .catch(() => active && setDriver(null));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function confirm() {
+    if (confirming) return;
+    // Sans chauffeur réel (API injoignable), on bascule en démo sur le suivi.
+    if (!driver) {
+      navigation.navigate('TrackingPremium', { startPoint, endPoint });
+      return;
+    }
+    setConfirming(true);
+    try {
+      await createBooking({
+        rideRef,
+        actorId: driver.userId,
+        mode: 'premium',
+        price: PREMIUM_PRICE,
+      });
+      navigation.navigate('TrackingPremium', { rideRef, name: driver.name, startPoint, endPoint });
+    } catch {
+      Alert.alert('Erreur', "La confirmation a échoué. Réessayez.");
+    } finally {
+      setConfirming(false);
+    }
+  }
+
+  const driverName = driver?.name ?? 'Mélanie Lepenant';
+  const driverRating = driver?.rating ?? '4.9';
+  const vehicleLabel = driver?.vehicle
+    ? `${driver.vehicle.brand} ${driver.vehicle.model} ${driver.vehicle.color}`
+    : 'Berline Noire';
 
   return (
     <View style={styles.root}>
@@ -34,7 +81,7 @@ export function DriverScreen() {
             <Text style={styles.pageTitle}>Chauffeur premium</Text>
           </View>
           <View style={styles.routeCompact}>
-            <RouteCard position="62 Rue de la Paix, Paris" destination="Gare du Nord, 75010" compact />
+            <RouteCard position={startPoint} destination={endPoint} compact />
           </View>
         </View>
 
@@ -58,13 +105,13 @@ export function DriverScreen() {
             </View>
           </View>
           <View style={styles.driverInfo}>
-            <Text style={styles.driverName}>Mélanie Lepenant</Text>
+            <Text style={styles.driverName}>{driverName}</Text>
             <Text style={styles.driverRole}>Chauffeur Certifié & Escorte</Text>
             <View style={styles.stars}>
               {[0, 1, 2, 3, 4].map((i) => (
                 <FontAwesome key={i} name="star" size={12} color={colors.starRose} />
               ))}
-              <Text style={styles.ratingValue}>(4.9)</Text>
+              <Text style={styles.ratingValue}>({driverRating})</Text>
             </View>
           </View>
         </View>
@@ -74,7 +121,7 @@ export function DriverScreen() {
           <View style={styles.infoCard}>
             <MaterialCommunityIcons name="car-outline" size={24} color="#ffffff" />
             <Text style={styles.infoTitle}>Véhicule</Text>
-            <Text style={styles.infoMuted}>Berline Noire</Text>
+            <Text style={styles.infoMuted}>{vehicleLabel}</Text>
           </View>
           <View style={styles.infoCard}>
             <MaterialCommunityIcons name="shield-check-outline" size={20} color="#ffffff" />
@@ -93,8 +140,8 @@ export function DriverScreen() {
         </View>
 
         {/* Confirmer */}
-        <Pressable style={styles.confirmBtn} onPress={() => navigation.navigate('TrackingPremium')}>
-          <Text style={styles.confirmText}>Confirmer le trajet</Text>
+        <Pressable style={styles.confirmBtn} onPress={confirm} disabled={confirming}>
+          <Text style={styles.confirmText}>{confirming ? 'Confirmation…' : 'Confirmer le trajet'}</Text>
         </Pressable>
       </ScrollView>
 

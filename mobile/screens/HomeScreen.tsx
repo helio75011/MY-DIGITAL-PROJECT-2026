@@ -4,6 +4,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import { ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
 import { AppHeader } from '../components/AppHeader';
+import { goToTab } from '../navigation/helpers';
 import { colors } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -34,7 +35,7 @@ export function HomeScreen() {
               <Text style={styles.tripSubtitle}>
                 Effectuez un trajet avec une femme à proximité
               </Text>
-              <Pressable style={styles.tripButton} onPress={() => navigation.navigate('Matching')}>
+              <Pressable style={styles.tripButton} onPress={() => goToTab(navigation, 'Trajets')}>
                 <Text style={styles.tripButtonText}>LANCER LA RECHERCHE</Text>
                 <Feather name="arrow-right" size={16} color="#ffffff" />
               </Pressable>
@@ -69,7 +70,7 @@ export function HomeScreen() {
             </Pressable>
 
             {/* Bouton "Réservez votre chauffeur" */}
-            <Pressable style={styles.driverButton} onPress={() => navigation.navigate('Driver')}>
+            <Pressable style={styles.driverButton} onPress={() => goToTab(navigation, 'Trajets')}>
               <Text style={styles.driverButtonText}>RÉSERVEZ VOTRE CHAUFFEUR</Text>
             </Pressable>
           </View>
