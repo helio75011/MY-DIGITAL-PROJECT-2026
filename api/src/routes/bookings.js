@@ -1,6 +1,7 @@
 const express = require('express');
 const pool = require('../db');
 const requireAuth = require('../middlewares/requireAuth');
+const safematch = require('../safematch/store');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -158,7 +159,15 @@ router.post('/bookings', async (req, res, next) => {
     );
     await conn.commit();
 
-    res.status(201).json({ rideRef, actorId, status: 'ongoing' });
+    // Génère le code SafeMatch d'embarquement (couleur + 4 chiffres).
+    const code = safematch.generate(rideRef);
+
+    res.status(201).json({
+      rideRef,
+      actorId,
+      status: 'ongoing',
+      safematch: { color: code.color, digits: code.digits },
+    });
   } catch (err) {
     await conn.rollback();
     next(err);

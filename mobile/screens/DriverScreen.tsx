@@ -47,13 +47,23 @@ export function DriverScreen() {
     }
     setConfirming(true);
     try {
-      await createBooking({
+      const res = await createBooking({
         rideRef,
         actorId: driver.userId,
         mode: 'premium',
         price: PREMIUM_PRICE,
       });
-      navigation.navigate('TrackingPremium', { rideRef, actorId: driver.userId, name: driver.name, startPoint, endPoint });
+      // Étape SafeMatch avant le suivi premium.
+      navigation.navigate('SafeMatch', {
+        rideRef,
+        actorId: driver.userId,
+        name: driver.name,
+        startPoint,
+        endPoint,
+        premium: true,
+        color: res.safematch?.color,
+        digits: res.safematch?.digits,
+      });
     } catch {
       Alert.alert('Erreur', "La confirmation a échoué. Réessayez.");
     } finally {

@@ -50,6 +50,10 @@ export async function createBooking(input: {
   mode: RideMode;
   price?: number;
   isSponsored?: boolean;
-}): Promise<{ rideRef: string; status: string }> {
+}): Promise<{
+  rideRef: string;
+  status: string;
+  safematch?: { color: string; digits: string };
+}> {
   return api.postJson('/bookings', input);
 }

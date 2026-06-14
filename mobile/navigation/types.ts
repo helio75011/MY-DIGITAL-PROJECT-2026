@@ -9,8 +9,23 @@ export type RootStackParamList = {
   Kyc: undefined;
   Matching: RideFlowParams;
   Driver: RideFlowParams;
+  SafeMatch: SafeMatchParams;
   Tracking: TrackingParams | undefined;
   TrackingPremium: TrackingParams | undefined;
+};
+
+// Params de l'écran SafeMatch (validation à l'embarquement).
+export type SafeMatchParams = {
+  rideRef: string;
+  actorId: number;
+  name: string;
+  startPoint: string;
+  endPoint: string;
+  /** Variante du suivi à ouvrir après confirmation. */
+  premium?: boolean;
+  /** Code déjà connu (renvoyé par /bookings) pour éviter un GET. */
+  color?: string;
+  digits?: string;
 };
 
 // Params du suivi : référence du trajet à suivre (absente = mode démo).

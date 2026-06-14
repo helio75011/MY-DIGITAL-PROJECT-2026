@@ -64,8 +64,17 @@ export function MatchingScreen() {
     }
     setBooking(c.userId);
     try {
-      await createBooking({ rideRef, actorId: c.userId, mode: 'solidaire', price: 0 });
-      navigation.navigate('Tracking', { rideRef, actorId: c.userId, name: c.name, startPoint, endPoint });
+      const res = await createBooking({ rideRef, actorId: c.userId, mode: 'solidaire', price: 0 });
+      // Étape SafeMatch : valider le code d'embarquement avant le suivi.
+      navigation.navigate('SafeMatch', {
+        rideRef,
+        actorId: c.userId,
+        name: c.name,
+        startPoint,
+        endPoint,
+        color: res.safematch?.color,
+        digits: res.safematch?.digits,
+      });
     } catch {
       Alert.alert('Erreur', "La réservation a échoué. Réessayez.");
     } finally {

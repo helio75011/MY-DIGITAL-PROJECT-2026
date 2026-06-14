@@ -7,6 +7,7 @@ const authRouter = require('./routes/auth');
 const ridesRouter = require('./routes/rides');
 const bookingsRouter = require('./routes/bookings');
 const trackingRouter = require('./routes/tracking');
+const safematchRouter = require('./routes/safematch');
 const ratingsRouter = require('./routes/ratings');
 const adminRouter = require('./routes/admin');
 const kycRouter = require('./routes/kyc');
@@ -36,6 +37,7 @@ app.use('/', adminRouter); // /admin (dashboard), /admin/incidents
 app.use('/rides', ridesRouter);
 app.use('/', bookingsRouter); // POST /rides, GET /matching, POST /bookings
 app.use('/', trackingRouter); // /rides/:ref/track, /rides/:ref/complete, /incidents
+app.use('/', safematchRouter); // /rides/:ref/safematch (+/confirm)
 app.use('/', ratingsRouter); // POST /ratings
 app.use('/kyc', kycRouter);
 
