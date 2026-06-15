@@ -45,7 +45,7 @@ export function WelcomeScreen() {
     setError(null);
     setSubmitting(true);
     try {
-      await login(email.trim(), password);
+      await login(email.trim().toLowerCase(), password);
       // Pas de navigation manuelle : RootNavigator réagit à `user`.
     } catch (err) {
       setError(loginErrorMessage(err));
@@ -84,6 +84,7 @@ export function WelcomeScreen() {
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
+            autoCorrect={false}
             keyboardType="email-address"
             textContentType="emailAddress"
             textAlign="center"
@@ -96,6 +97,9 @@ export function WelcomeScreen() {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            textContentType="password"
             textAlign="center"
             onSubmitEditing={handleLogin}
           />

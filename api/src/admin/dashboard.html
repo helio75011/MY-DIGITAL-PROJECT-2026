@@ -32,6 +32,16 @@
     .resolve-btn { background:#07521d; }
     .hidden { display:none; }
     .empty { text-align:center; color:var(--muted); padding:40px; }
+    .tabs { display:flex; gap:8px; margin-bottom:16px; }
+    .tab { background:#e9ecf5; color:var(--navy); border:0; border-radius:8px; padding:8px 18px; font-size:14px; font-weight:600; cursor:pointer; }
+    .tab.active { background:var(--navy); color:#fff; }
+    .pill { display:inline-block; padding:2px 10px; border-radius:20px; font-size:12px; font-weight:700; }
+    .pill.ok { background:#d8f3df; color:#07521d; }
+    .pill.ko { background:#fff3cd; color:#7a5a00; }
+    .pill.ban { background:#ffe2e2; color:var(--red); }
+    .ban-btn { background:var(--red); }
+    .verify-btn { background:#07521d; }
+    .row-actions { display:flex; gap:6px; }
   </style>
 </head>
 <body>
@@ -52,19 +62,42 @@
 
     <!-- Dashboard -->
     <div id="dashboard" class="hidden">
-      <div class="toolbar">
-        <span><span class="count" id="openCount">0</span> alerte(s) en cours</span>
-        <span class="status" id="refreshInfo" style="color:var(--muted)">Actualisation auto toutes les 5 s</span>
+      <div class="tabs">
+        <button class="tab active" id="tabAlerts" onclick="showTab('alerts')">🚨 Alertes SOS</button>
+        <button class="tab" id="tabUsers" onclick="showTab('users')">👥 Utilisateurs</button>
       </div>
-      <table id="table">
-        <thead>
-          <tr>
-            <th>Type</th><th>Passagère</th><th>Téléphone</th><th>Trajet</th><th>Heure</th><th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
-      <div class="empty hidden" id="empty">Aucun incident enregistré.</div>
+
+      <!-- Onglet Alertes -->
+      <div id="alertsView">
+        <div class="toolbar">
+          <span><span class="count" id="openCount">0</span> alerte(s) en cours</span>
+          <span class="status" id="refreshInfo" style="color:var(--muted)">Actualisation auto toutes les 5 s</span>
+        </div>
+        <table id="table">
+          <thead>
+            <tr>
+              <th>Type</th><th>Passagère</th><th>Téléphone</th><th>Trajet</th><th>Heure</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div class="empty hidden" id="empty">Aucun incident enregistré.</div>
+      </div>
+
+      <!-- Onglet Utilisateurs (modération KYC + bannissement) -->
+      <div id="usersView" class="hidden">
+        <div class="toolbar">
+          <span class="status" style="color:var(--muted)">Validez les profils (KYC) et gérez les accès.</span>
+        </div>
+        <table id="usersTable">
+          <thead>
+            <tr>
+              <th>Nom</th><th>E-mail</th><th>Rôle</th><th>Docs</th><th>Statut</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="userRows"></tbody>
+        </table>
+      </div>
     </div>
   </main>
 
@@ -90,7 +123,8 @@
         document.getElementById('dashboard').classList.remove('hidden');
         document.getElementById('status').textContent = 'Connecté · ' + data.user.email;
         load();
-        setInterval(load, 5000);
+        loadUsers();
+        setInterval(() => { load(); if (currentTab === 'users') loadUsers(); }, 5000);
       } catch (e) {
         err.textContent = e.message === 'invalid_credentials'
           ? 'E-mail ou mot de passe incorrect.'
@@ -152,6 +186,70 @@
         headers: { Authorization: 'Bearer ' + token },
       });
       load();
+    }
+
+    // --- Onglets ---
+    let currentTab = 'alerts';
+    function showTab(tab) {
+      currentTab = tab;
+      document.getElementById('alertsView').classList.toggle('hidden', tab !== 'alerts');
+      document.getElementById('usersView').classList.toggle('hidden', tab !== 'users');
+      document.getElementById('tabAlerts').classList.toggle('active', tab === 'alerts');
+      document.getElementById('tabUsers').classList.toggle('active', tab === 'users');
+      if (tab === 'users') loadUsers();
+    }
+
+    // --- Utilisateurs (modération) ---
+    async function loadUsers() {
+      try {
+        const res = await fetch('/admin/users', { headers: { Authorization: 'Bearer ' + token } });
+        if (!res.ok) return;
+        renderUsers(await res.json());
+      } catch {}
+    }
+
+    function renderUsers(users) {
+      const tbody = document.getElementById('userRows');
+      tbody.innerHTML = '';
+      for (const u of users) {
+        const tr = document.createElement('tr');
+        if (u.banned) tr.className = 'resolved';
+        const statut = u.banned
+          ? '<span class="pill ban">Banni</span>'
+          : (u.verified ? '<span class="pill ok">Vérifié</span>' : '<span class="pill ko">Non vérifié</span>');
+        const verifyBtn = u.verified
+          ? '<button class="btn" onclick="setVerify(' + u.id + ',false)">Retirer vérif.</button>'
+          : '<button class="btn verify-btn" onclick="setVerify(' + u.id + ',true)">Valider KYC</button>';
+        const banBtn = u.banned
+          ? '<button class="btn" onclick="setBan(' + u.id + ',false)">Réactiver</button>'
+          : '<button class="btn ban-btn" onclick="setBan(' + u.id + ',true)">Bannir</button>';
+        tr.innerHTML =
+          '<td>' + escapeHtml(u.name) + '</td>' +
+          '<td>' + escapeHtml(u.email) + '</td>' +
+          '<td>' + escapeHtml(u.role) + '</td>' +
+          '<td>' + u.docCount + '</td>' +
+          '<td>' + statut + '</td>' +
+          '<td><div class="row-actions">' + verifyBtn + banBtn + '</div></td>';
+        tbody.appendChild(tr);
+      }
+    }
+
+    async function setVerify(id, verified) {
+      await fetch('/admin/users/' + id + '/verify', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ verified }),
+      });
+      loadUsers();
+    }
+
+    async function setBan(id, banned) {
+      await fetch('/admin/users/' + id + '/ban', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ banned }),
+      });
+      loadUsers();
     }
 
     function escapeHtml(s) {

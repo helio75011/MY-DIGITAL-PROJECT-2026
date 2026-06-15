@@ -5,33 +5,37 @@ import { colors } from '../theme/colors';
 
 export type TabKey = 'Accueil' | 'Historique' | 'Profile' | 'Trajets';
 
-type Tab = {
-  key: TabKey;
+export type NavTab<K extends string = string> = {
+  key: K;
   icon: keyof typeof Feather.glyphMap;
   label: string;
 };
 
-const TABS: Tab[] = [
+// Onglets passagère par défaut (rétrocompatibilité).
+const PASSENGER_TABS: NavTab<TabKey>[] = [
   { key: 'Accueil', icon: 'home', label: 'ACCUEIL' },
   { key: 'Historique', icon: 'clock', label: 'HISTORIQUE' },
   { key: 'Profile', icon: 'user', label: 'PROFILE' },
   { key: 'Trajets', icon: 'navigation', label: 'TRAJETS' },
 ];
 
-type Props = {
-  active: TabKey;
-  onNavigate?: (tab: TabKey) => void;
+type Props<K extends string = TabKey> = {
+  active: K;
+  onNavigate?: (tab: K) => void;
+  /** Onglets personnalisés (ex. expérience acteur). Défaut : onglets passagère. */
+  tabs?: NavTab<K>[];
 };
 
 /**
- * Barre de navigation inférieure commune (4 onglets).
- * Utilisée par tous les écrans applicatifs ; l'onglet `active` est mis
- * en évidence et `onNavigate` est appelé au tap.
+ * Barre de navigation inférieure commune.
+ * Par défaut les 4 onglets passagère ; `tabs` permet une autre liste (acteur).
+ * L'onglet `active` est mis en évidence et `onNavigate` est appelé au tap.
  */
-export function BottomNav({ active, onNavigate }: Props) {
+export function BottomNav<K extends string = TabKey>({ active, onNavigate, tabs }: Props<K>) {
+  const items = (tabs ?? (PASSENGER_TABS as unknown as NavTab<K>[]));
   return (
     <View style={styles.bar}>
-      {TABS.map((tab) => {
+      {items.map((tab) => {
         const isActive = tab.key === active;
         return (
           <Pressable

@@ -99,7 +99,7 @@ router.post('/login', async (req, res, next) => {
 
   try {
     const [rows] = await pool.query(
-      `SELECT user_id, email, password, first_name, last_name, phone, is_verified, role_code
+      `SELECT user_id, email, password, first_name, last_name, phone, is_verified, is_banned, role_code
        FROM app_user WHERE email = :email`,
       { email }
     );
@@ -109,6 +109,10 @@ router.post('/login', async (req, res, next) => {
     const ok = user && (await bcrypt.compare(String(password), user.password));
     if (!ok) {
       return res.status(401).json({ error: 'invalid_credentials' });
+    }
+    // Un compte banni ne peut plus se connecter.
+    if (user.is_banned) {
+      return res.status(403).json({ error: 'account_banned' });
     }
 
     const token = signToken(user);

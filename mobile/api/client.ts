@@ -100,4 +100,14 @@ async function del<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export const api = { getJson, postJson, postForm, del };
+async function put<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'PUT',
+    headers: buildHeaders(),
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) await parseError(res);
+  return res.json() as Promise<T>;
+}
+
+export const api = { getJson, postJson, postForm, del, put };

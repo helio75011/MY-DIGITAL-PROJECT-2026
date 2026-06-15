@@ -6,6 +6,8 @@ export type RootStackParamList = {
   Signup: undefined;
   Biometric: undefined;
   MainTabs: undefined;
+  ActorTabs: undefined;
+  ActorVehicle: undefined;
   Kyc: undefined;
   Contacts: undefined;
   Matching: RideFlowParams;
@@ -47,12 +49,19 @@ export type RideFlowParams = {
   endPoint: string;
 };
 
-// Onglets de la barre inférieure.
+// Onglets de la barre inférieure (passagère).
 export type MainTabParamList = {
   Accueil: undefined;
   Historique: undefined;
   Profile: undefined;
   Trajets: undefined;
+};
+
+// Onglets de la barre inférieure (acteur : accompagnatrice / chauffeur).
+export type ActorTabParamList = {
+  Courses: undefined;
+  MesTrajets: undefined;
+  MonProfil: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> =

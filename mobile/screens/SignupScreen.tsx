@@ -70,7 +70,7 @@ export function SignupScreen() {
     setSubmitting(true);
     try {
       await register({
-        email: email.trim(),
+        email: email.trim().toLowerCase(),
         password,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
@@ -146,6 +146,8 @@ export function SignupScreen() {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
             textAlign="center"
           />
           <TextInput
@@ -155,6 +157,8 @@ export function SignupScreen() {
             value={confirm}
             onChangeText={setConfirm}
             secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
             textAlign="center"
             onSubmitEditing={handleSignup}
           />

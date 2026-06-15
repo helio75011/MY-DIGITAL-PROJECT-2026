@@ -62,4 +62,70 @@ router.post('/admin/incidents/:ref/resolve', requireAuth, requireAdmin, async (r
   }
 });
 
+/**
+ * GET /admin/users  (ADMIN) — liste des utilisateurs pour la modération
+ * (validation KYC + bannissement). Les non-vérifiés et bannis remontent en tête.
+ */
+router.get('/admin/users', requireAuth, requireAdmin, async (_req, res, next) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT
+         u.user_id                              AS id,
+         CONCAT(u.first_name, ' ', u.last_name) AS name,
+         u.email,
+         u.phone,
+         u.role_code                            AS role,
+         u.is_verified                          AS verified,
+         u.is_banned                            AS banned,
+         (SELECT COUNT(*) FROM documents d WHERE d.user_id = u.user_id) AS docCount
+       FROM app_user u
+       WHERE u.role_code <> 'ADMIN'
+       ORDER BY u.is_banned DESC, u.is_verified ASC, u.user_id ASC`
+    );
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * POST /admin/users/:id/verify   (ADMIN) — valide (ou refuse) le KYC.
+ * Body : { verified: boolean }
+ */
+router.post('/admin/users/:id/verify', requireAuth, requireAdmin, async (req, res, next) => {
+  const verified = req.body?.verified !== false; // true par défaut
+  try {
+    const [result] = await pool.query(
+      'UPDATE app_user SET is_verified = :verified WHERE user_id = :id AND role_code <> \'ADMIN\'',
+      { verified: verified ? 1 : 0, id: req.params.id }
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'user_not_found' });
+    }
+    res.json({ id: Number(req.params.id), verified });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * POST /admin/users/:id/ban   (ADMIN) — bannit (ou réactive) un utilisateur.
+ * Body : { banned: boolean }
+ */
+router.post('/admin/users/:id/ban', requireAuth, requireAdmin, async (req, res, next) => {
+  const banned = req.body?.banned !== false; // true par défaut
+  try {
+    const [result] = await pool.query(
+      'UPDATE app_user SET is_banned = :banned WHERE user_id = :id AND role_code <> \'ADMIN\'',
+      { banned: banned ? 1 : 0, id: req.params.id }
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'user_not_found' });
+    }
+    res.json({ id: Number(req.params.id), banned });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

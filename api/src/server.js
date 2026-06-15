@@ -10,6 +10,7 @@ const trackingRouter = require('./routes/tracking');
 const safematchRouter = require('./routes/safematch');
 const ratingsRouter = require('./routes/ratings');
 const contactsRouter = require('./routes/contacts');
+const actorRouter = require('./routes/actor');
 const adminRouter = require('./routes/admin');
 const kycRouter = require('./routes/kyc');
 
@@ -41,6 +42,7 @@ app.use('/', trackingRouter); // /rides/:ref/track, /rides/:ref/complete, /incid
 app.use('/', safematchRouter); // /rides/:ref/safematch (+/confirm)
 app.use('/', ratingsRouter); // POST /ratings
 app.use('/', contactsRouter); // /contacts (CRUD)
+app.use('/', actorRouter); // /actor/* (côté accompagnatrice/chauffeur)
 app.use('/kyc', kycRouter);
 
 // Gestion d'erreur centralisée.
