@@ -10,6 +10,7 @@ export type RootStackParamList = {
   ActorVehicle: undefined;
   Kyc: undefined;
   Contacts: undefined;
+  SafeZones: undefined;
   Matching: RideFlowParams;
   Driver: RideFlowParams;
   SafeMatch: SafeMatchParams;

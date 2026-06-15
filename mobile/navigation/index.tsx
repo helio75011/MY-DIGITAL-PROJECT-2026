@@ -20,6 +20,7 @@ import { KycScreen } from '../screens/KycScreen';
 import { MatchingScreen } from '../screens/MatchingScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { SafeMatchScreen } from '../screens/SafeMatchScreen';
+import { SafeZonesScreen } from '../screens/SafeZonesScreen';
 import { SignupScreen } from '../screens/SignupScreen';
 import { TrackingScreen } from '../screens/TrackingScreen';
 import { WelcomeScreen } from '../screens/WelcomeScreen';
@@ -139,6 +140,7 @@ export function RootNavigator() {
           <Stack.Screen name="MainTabs" component={MainTabs} />
           <Stack.Screen name="Kyc" component={KycScreen} />
           <Stack.Screen name="Contacts" component={ContactsScreen} />
+          <Stack.Screen name="SafeZones" component={SafeZonesScreen} />
           <Stack.Screen name="Matching" component={MatchingScreen} />
           <Stack.Screen name="Driver" component={DriverScreen} />
           <Stack.Screen name="SafeMatch" component={SafeMatchScreen} />

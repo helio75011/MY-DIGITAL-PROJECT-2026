@@ -48,20 +48,20 @@ export function HomeScreen() {
                   <Text style={styles.smallCardTitle}>Mes contacts</Text>
                   <Ionicons name="shield-checkmark-outline" size={16} color={colors.navy} />
                 </View>
-                <Text style={styles.smallCardSubtitle}>4 contacts sur</Text>
-                <Pressable style={styles.addButton}>
+                <Text style={styles.smallCardSubtitle}>Contacts d'urgence</Text>
+                <Pressable style={styles.addButton} onPress={() => navigation.navigate('Contacts')}>
                   <Feather name="plus" size={14} color="#ffffff" />
-                  <Text style={styles.addButtonText}>AJOUTER CONTACT</Text>
+                  <Text style={styles.addButtonText}>GÉRER</Text>
                 </Pressable>
               </View>
 
-              <View style={styles.smallCard}>
+              <Pressable style={styles.smallCard} onPress={() => navigation.navigate('SafeZones')}>
                 <View style={styles.smallCardHeader}>
                   <Text style={styles.smallCardTitle}>Zone de sécurité</Text>
-                  <Ionicons name="shield-checkmark-outline" size={16} color={colors.green} />
+                  <Ionicons name="map-outline" size={16} color={colors.green} />
                 </View>
-                <Text style={styles.smallCardSubtitle}>Votre zone actuelle</Text>
-              </View>
+                <Text style={styles.smallCardSubtitle}>Voir les zones sûres</Text>
+              </Pressable>
             </View>
 
             {/* Bouton SOS flottant (chevauche la ligne du dessus) */}

@@ -58,4 +58,28 @@ router.get('/history', requireAuth, async (req, res, next) => {
   }
 });
 
+/**
+ * GET /rides/upcoming  (protégé)
+ * Trajets planifiés à venir de la passagère connectée (status 'scheduled').
+ */
+router.get('/upcoming', requireAuth, async (req, res, next) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT
+         ride_ref                                  AS id,
+         start_point                               AS departurePlace,
+         end_point                                 AS arrivalPlace,
+         DATE_FORMAT(scheduled_at, '%d/%m/%y')     AS date,
+         DATE_FORMAT(scheduled_at, '%Hh%i')        AS time
+       FROM ride
+       WHERE passenger_id = :passengerId AND status = 'scheduled'
+       ORDER BY scheduled_at ASC`,
+      { passengerId: req.userId }
+    );
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

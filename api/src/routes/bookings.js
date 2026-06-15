@@ -29,31 +29,47 @@ function fakeProximity(userId) {
  * Crée un trajet pour la passagère connectée (status 'searching').
  */
 router.post('/rides', async (req, res, next) => {
-  const { startPoint, endPoint, distanceKm, estimatedTime } = req.body || {};
+  const { startPoint, endPoint, distanceKm, estimatedTime, scheduledAt } = req.body || {};
   if (!startPoint || !endPoint) {
     return res.status(400).json({ error: 'missing_route' });
   }
 
+  // Trajet planifié si une date future est fournie ; sinon recherche immédiate.
+  let scheduled = null;
+  if (scheduledAt) {
+    const when = new Date(scheduledAt);
+    if (Number.isNaN(when.getTime())) {
+      return res.status(400).json({ error: 'invalid_date' });
+    }
+    if (when.getTime() < Date.now()) {
+      return res.status(400).json({ error: 'date_in_past' });
+    }
+    // Format MySQL DATETIME 'YYYY-MM-DD HH:MM:SS'.
+    scheduled = when.toISOString().slice(0, 19).replace('T', ' ');
+  }
+  const status = scheduled ? 'scheduled' : 'searching';
+
   try {
-    // Référence lisible et unique : RIDE-<timestamp base36>.
     const rideRef = `RIDE-${Date.now().toString(36).toUpperCase()}`.slice(0, 30);
 
     await pool.query(
       `INSERT INTO ride
-         (ride_ref, start_point, end_point, status, distance, estimated_time, passenger_id)
+         (ride_ref, start_point, end_point, status, scheduled_at, distance, estimated_time, passenger_id)
        VALUES
-         (:rideRef, :startPoint, :endPoint, 'searching', :distance, :estimated, :passengerId)`,
+         (:rideRef, :startPoint, :endPoint, :status, :scheduled, :distance, :estimated, :passengerId)`,
       {
         rideRef,
         startPoint,
         endPoint,
+        status,
+        scheduled,
         distance: distanceKm ?? null,
         estimated: estimatedTime ?? null,
         passengerId: req.userId,
       }
     );
 
-    res.status(201).json({ rideRef, status: 'searching' });
+    res.status(201).json({ rideRef, status, scheduledAt: scheduled });
   } catch (err) {
     next(err);
   }

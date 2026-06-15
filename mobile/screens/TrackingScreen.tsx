@@ -3,6 +3,7 @@ import { useNavigation, useRoute, type RouteProp } from '@react-navigation/nativ
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Battery from 'expo-battery';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as LocalAuthentication from 'expo-local-authentication';
 import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
 import { ImageBackground, Linking, Modal, Pressable, Share, StyleSheet, Text, View } from 'react-native';
@@ -157,6 +158,24 @@ export function TrackingScreen({
 
   async function handleSos() {
     if (sosSending) return;
+
+    // Confirmation biométrique (empreinte / Face ID) avant de déclencher, pour
+    // éviter les SOS accidentels. Si l'appareil n'a pas de biométrie enrôlée, on
+    // déclenche directement (l'urgence prime ; on ne bloque jamais l'alerte).
+    try {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const enrolled = await LocalAuthentication.isEnrolledAsync();
+      if (hasHardware && enrolled) {
+        const result = await LocalAuthentication.authenticateAsync({
+          promptMessage: 'Confirmez l\'alerte SOS',
+          cancelLabel: 'Annuler',
+        });
+        if (!result.success) return; // annulation explicite -> pas de SOS
+      }
+    } catch {
+      /* biométrie indisponible : on poursuit le déclenchement */
+    }
+
     setSosSending(true);
     try {
       // 1) Trace l'incident côté serveur (dashboard admin).

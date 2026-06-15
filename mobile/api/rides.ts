@@ -28,14 +28,29 @@ export type MatchActor = {
   vehicle: { brand: string; model: string; color: string; plate: string } | null;
 };
 
-/** Crée un trajet (status 'searching') et renvoie sa référence. */
+/** Crée un trajet. Si `scheduledAt` est fourni, le trajet est planifié. */
 export async function createRide(input: {
   startPoint: string;
   endPoint: string;
   distanceKm?: number;
   estimatedTime?: number;
-}): Promise<{ rideRef: string }> {
+  /** ISO string (ex. new Date(...).toISOString()) pour un trajet planifié. */
+  scheduledAt?: string;
+}): Promise<{ rideRef: string; status: string; scheduledAt: string | null }> {
   return api.postJson('/rides', input);
+}
+
+export type UpcomingRide = {
+  id: string;
+  departurePlace: string;
+  arrivalPlace: string;
+  date: string;
+  time: string;
+};
+
+/** Trajets planifiés à venir de la passagère connectée. */
+export async function fetchUpcoming(): Promise<UpcomingRide[]> {
+  return api.getJson('/rides/upcoming');
 }
 
 /** Liste les acteurs disponibles pour un mode, avec note moyenne réelle. */

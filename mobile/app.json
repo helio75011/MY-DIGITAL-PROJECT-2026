@@ -34,7 +34,8 @@
           "locationAlwaysAndWhenInUsePermission": "Link & Walk utilise votre position pour définir votre point de départ et trouver des accompagnatrices à proximité."
         }
       ],
-      "expo-image-picker"
+      "expo-image-picker",
+      "@react-native-community/datetimepicker"
     ]
   }
 }

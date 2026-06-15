@@ -1,14 +1,23 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { getCurrentPosition, haversineKm, type GeoPoint } from '../api/location';
 import { createRide, type RideMode } from '../api/rides';
 import { AppHeader } from '../components/AppHeader';
 import { ModeCard } from '../components/ModeCard';
 import { colors } from '../theme/colors';
+import { goToTab } from '../navigation/helpers';
 import type { RootStackParamList } from '../navigation/types';
+
+// Format lisible "lun. 20 juin · 22:30" pour un créneau planifié.
+function formatSchedule(d: Date): string {
+  const date = d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long' });
+  const time = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  return `${date} · ${time}`;
+}
 
 /**
  * Écran "Réserver un trajet" (onglet "Trajets", Figma 23:2060).
@@ -24,6 +33,10 @@ export function BookingScreen() {
   const [destination, setDestination] = useState('');
   const [locating, setLocating] = useState(true);
   const [submitting, setSubmitting] = useState<RideMode | null>(null);
+  // Planification : null = trajet immédiat ; une date = trajet planifié.
+  const [scheduledAt, setScheduledAt] = useState<Date | null>(null);
+  const [showPicker, setShowPicker] = useState(false);
+  const [scheduling, setScheduling] = useState(false);
 
   // Tente de récupérer la position GPS et de remplir le champ de départ.
   async function locate() {
@@ -83,6 +96,42 @@ export function BookingScreen() {
     }
   }
 
+  // Crée un trajet planifié (pas de matching immédiat) puis renvoie à l'historique.
+  async function schedule() {
+    if (scheduling || !scheduledAt) return;
+    if (!originLabel.trim() || !destination.trim()) {
+      Alert.alert('Trajet incomplet', 'Indiquez le départ et la destination.');
+      return;
+    }
+    setScheduling(true);
+    try {
+      await createRide({
+        startPoint: originLabel,
+        endPoint: destination.trim(),
+        distanceKm: origin ? haversineKm(origin, { ...origin, label: '' }) : undefined,
+        scheduledAt: scheduledAt.toISOString(),
+      });
+      Alert.alert('Trajet planifié', `Réservé pour le ${formatSchedule(scheduledAt)}.`);
+      setScheduledAt(null);
+      goToTab(navigation, 'Historique');
+    } catch {
+      Alert.alert('Erreur', 'Impossible de planifier le trajet. Réessayez.');
+    } finally {
+      setScheduling(false);
+    }
+  }
+
+  function onPickerChange(event: { type: string }, selected?: Date) {
+    setShowPicker(false);
+    if (event.type === 'set' && selected) {
+      if (selected.getTime() < Date.now()) {
+        Alert.alert('Date invalide', 'Choisissez une date et une heure futures.');
+        return;
+      }
+      setScheduledAt(selected);
+    }
+  }
+
   return (
     <View style={styles.root}>
       <AppHeader />
@@ -135,28 +184,68 @@ export function BookingScreen() {
           </View>
         </View>
 
-        {/* Modes de trajet */}
-        <Text style={styles.sectionTitle}>Choisir votre mode de trajet</Text>
+        {/* Planification : départ immédiat ou créneau futur */}
+        <Pressable style={styles.scheduleRow} onPress={() => setShowPicker(true)}>
+          <Feather name="calendar" size={18} color={colors.primary} />
+          <Text style={styles.scheduleText}>
+            {scheduledAt ? formatSchedule(scheduledAt) : 'Planifier pour plus tard'}
+          </Text>
+          {scheduledAt ? (
+            <Pressable hitSlop={8} onPress={() => setScheduledAt(null)}>
+              <Feather name="x" size={18} color={colors.bodyText} />
+            </Pressable>
+          ) : (
+            <Feather name="chevron-right" size={18} color={colors.bodyText} />
+          )}
+        </Pressable>
 
-        <View style={styles.modes}>
-          <ModeCard
-            variant="solidaire"
-            title="Accompagnement Solidaire"
-            description="Profils vérifiés, femme à femme. Idéal pour les trajets quotidiens."
-            eta="21 min"
-            onPress={() => startRide('solidaire')}
-            loading={submitting === 'solidaire'}
+        {showPicker ? (
+          <DateTimePicker
+            value={scheduledAt ?? new Date(Date.now() + 3600_000)}
+            mode={Platform.OS === 'ios' ? 'datetime' : 'date'}
+            minimumDate={new Date()}
+            onChange={onPickerChange}
           />
-          <ModeCard
-            variant="premium"
-            title="Chauffeur Premium"
-            description="Agent certifié avec véhicule de veille. Protection maximale immédiate."
-            eta="12 min"
-            price="15,00€"
-            onPress={() => startRide('premium')}
-            loading={submitting === 'premium'}
-          />
-        </View>
+        ) : null}
+
+        {scheduledAt ? (
+          /* Trajet planifié : confirmation (pas de matching immédiat) */
+          <Pressable
+            style={[styles.confirmScheduleBtn, scheduling && styles.btnDisabled]}
+            onPress={schedule}
+            disabled={scheduling}
+          >
+            {scheduling ? (
+              <ActivityIndicator color="#ffffff" />
+            ) : (
+              <Text style={styles.confirmScheduleText}>Confirmer la réservation</Text>
+            )}
+          </Pressable>
+        ) : (
+          <>
+            {/* Modes de trajet (départ immédiat) */}
+            <Text style={styles.sectionTitle}>Choisir votre mode de trajet</Text>
+            <View style={styles.modes}>
+              <ModeCard
+                variant="solidaire"
+                title="Accompagnement Solidaire"
+                description="Profils vérifiés, femme à femme. Idéal pour les trajets quotidiens."
+                eta="21 min"
+                onPress={() => startRide('solidaire')}
+                loading={submitting === 'solidaire'}
+              />
+              <ModeCard
+                variant="premium"
+                title="Chauffeur Premium"
+                description="Agent certifié avec véhicule de veille. Protection maximale immédiate."
+                eta="12 min"
+                price="15,00€"
+                onPress={() => startRide('premium')}
+                loading={submitting === 'premium'}
+              />
+            </View>
+          </>
+        )}
       </ScrollView>
     </View>
   );
@@ -231,5 +320,36 @@ const styles = StyleSheet.create({
   },
   modes: {
     gap: 20,
+  },
+  scheduleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 20,
+    backgroundColor: colors.routeFieldBg,
+    borderRadius: 10,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+  },
+  scheduleText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.navy,
+  },
+  confirmScheduleBtn: {
+    backgroundColor: colors.statusGreen,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  confirmScheduleText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  btnDisabled: {
+    opacity: 0.6,
   },
 });

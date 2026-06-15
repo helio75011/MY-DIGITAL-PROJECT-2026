@@ -1,8 +1,9 @@
 import { Feather, FontAwesome, Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { fetchStats, type UserStats } from '../api/stats';
 import { useAuth } from '../auth/AuthContext';
 import { AppHeader } from '../components/AppHeader';
 import { MenuRow } from '../components/MenuRow';
@@ -11,14 +12,21 @@ import { colors } from '../theme/colors';
 
 /**
  * Écran Profil (onglet "Profile", Figma 23:1902).
- * Avatar + badge vérifié, stats, sections "Sécurité & Protection" et
- * "Paramètres de l'application", déconnexion. Barre de nav fournie par les onglets.
+ * Avatar + badge vérifié, stats RÉELLES + badges (gamification), sections
+ * "Sécurité & Protection" / "Paramètres", déconnexion.
  */
 export function ProfileScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user, logout } = useAuth();
   const fullName = user ? `${user.firstName} ${user.lastName}` : 'Profil';
   const verified = user?.isVerified ?? false;
+
+  const [stats, setStats] = useState<UserStats | null>(null);
+  useFocusEffect(
+    useCallback(() => {
+      fetchStats().then(setStats).catch(() => setStats(null));
+    }, [])
+  );
 
   return (
     <View style={styles.root}>
@@ -68,19 +76,40 @@ export function ProfileScreen() {
           </Pressable>
         ) : null}
 
-        {/* Stats */}
+        {/* Stats (réelles) */}
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Ionicons name="shield-checkmark" size={28} color="#ffffff" />
-            <Text style={styles.statValue}>8</Text>
+            <Text style={styles.statValue}>{stats ? stats.completedTrips : '—'}</Text>
             <Text style={styles.statLabel}>Trajets sécurisés</Text>
           </View>
           <View style={styles.statCard}>
             <FontAwesome name="heart" size={26} color={colors.heartRed} />
-            <Text style={styles.statValue}>4.9</Text>
+            <Text style={styles.statValue}>{stats ? stats.trustScore : '—'}</Text>
             <Text style={styles.statLabel}>Score de confiance</Text>
           </View>
         </View>
+
+        {/* Badges (gamification) */}
+        {stats && stats.badges.length > 0 ? (
+          <>
+            <Text style={styles.sectionTitle}>MES BADGES</Text>
+            <View style={styles.badgesRow}>
+              {stats.badges.map((b) => (
+                <View key={b.code} style={[styles.badge, !b.unlocked && styles.badgeLocked]}>
+                  <Ionicons
+                    name={b.icon as keyof typeof Ionicons.glyphMap}
+                    size={24}
+                    color={b.unlocked ? colors.primary : colors.mutedText}
+                  />
+                  <Text style={[styles.badgeLabel, !b.unlocked && styles.badgeLabelLocked]}>
+                    {b.label}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </>
+        ) : null}
 
         {/* Section Sécurité & Protection */}
         <Text style={styles.sectionTitle}>SÉCURITÉ & PROTECTION</Text>
@@ -226,6 +255,32 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginTop: 24,
     marginBottom: 16,
+  },
+  badgesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  badge: {
+    width: 92,
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: colors.filterInactiveBg,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+  },
+  badgeLocked: {
+    opacity: 0.45,
+  },
+  badgeLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.navy,
+    textAlign: 'center',
+  },
+  badgeLabelLocked: {
+    color: colors.mutedText,
   },
   menuCard: {
     backgroundColor: colors.menuCardBg,

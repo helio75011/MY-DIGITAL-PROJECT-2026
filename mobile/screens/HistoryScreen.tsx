@@ -1,7 +1,8 @@
 import { Feather } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { fetchRideHistory } from '../api/rides';
+import { fetchRideHistory, fetchUpcoming, type UpcomingRide } from '../api/rides';
 import { AppHeader } from '../components/AppHeader';
 import { Trip, TripCard } from '../components/TripCard';
 import { colors } from '../theme/colors';
@@ -30,8 +31,19 @@ const FALLBACK_TRIPS: Trip[] = [
 export function HistoryScreen() {
   const [filter, setFilter] = useState<Filter>('Tout');
   const [allTrips, setAllTrips] = useState<Trip[]>(FALLBACK_TRIPS);
+  const [upcoming, setUpcoming] = useState<UpcomingRide[]>([]);
   const [loading, setLoading] = useState(true);
   const [offline, setOffline] = useState(false);
+
+  // Recharge les trajets planifiés à chaque fois que l'onglet reprend le focus
+  // (ex. après avoir planifié un trajet depuis l'écran Réserver).
+  useFocusEffect(
+    useCallback(() => {
+      fetchUpcoming()
+        .then(setUpcoming)
+        .catch(() => setUpcoming([]));
+    }, [])
+  );
 
   useEffect(() => {
     let active = true;
@@ -78,6 +90,24 @@ export function HistoryScreen() {
         <Text style={styles.subtitle}>Retrouvez vos trajets et vos chauffeurs.</Text>
         {offline ? (
           <Text style={styles.offline}>Mode hors-ligne (données de démonstration)</Text>
+        ) : null}
+
+        {/* Section "À venir" : trajets planifiés à l'avance */}
+        {upcoming.length > 0 ? (
+          <View style={styles.upcomingBlock}>
+            <Text style={styles.upcomingTitle}>À VENIR</Text>
+            {upcoming.map((u) => (
+              <View key={u.id} style={styles.upcomingCard}>
+                <View style={styles.upcomingWhen}>
+                  <Feather name="calendar" size={16} color="#ffffff" />
+                  <Text style={styles.upcomingDate}>{u.date} · {u.time}</Text>
+                </View>
+                <Text style={styles.upcomingRoute} numberOfLines={1}>
+                  {u.departurePlace} → {u.arrivalPlace}
+                </Text>
+              </View>
+            ))}
+          </View>
         ) : null}
 
         {/* Barre de filtres */}
@@ -149,6 +179,37 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginTop: 24,
+  },
+  upcomingBlock: {
+    marginTop: 12,
+    gap: 8,
+  },
+  upcomingTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1,
+    color: colors.bodyText,
+    marginBottom: 2,
+  },
+  upcomingCard: {
+    backgroundColor: colors.statusGreen,
+    borderRadius: 10,
+    padding: 14,
+    gap: 6,
+  },
+  upcomingWhen: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  upcomingDate: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  upcomingRoute: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 13,
   },
   filters: {
     flexDirection: 'row',

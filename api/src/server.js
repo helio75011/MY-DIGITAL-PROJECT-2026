@@ -11,6 +11,9 @@ const safematchRouter = require('./routes/safematch');
 const ratingsRouter = require('./routes/ratings');
 const contactsRouter = require('./routes/contacts');
 const actorRouter = require('./routes/actor');
+const statsRouter = require('./routes/stats');
+const zonesRouter = require('./routes/zones');
+const corridorRouter = require('./routes/corridor');
 const adminRouter = require('./routes/admin');
 const kycRouter = require('./routes/kyc');
 
@@ -42,6 +45,9 @@ app.use('/', trackingRouter); // /rides/:ref/track, /rides/:ref/complete, /incid
 app.use('/', safematchRouter); // /rides/:ref/safematch (+/confirm)
 app.use('/', ratingsRouter); // POST /ratings
 app.use('/', contactsRouter); // /contacts (CRUD)
+app.use('/', statsRouter); // /users/me/stats (avant actor : son requireActor global intercepterait)
+app.use('/', zonesRouter); // /safe-zones (avant actor, même raison)
+app.use('/', corridorRouter); // /corridor/assess (avant actor, même raison)
 app.use('/', actorRouter); // /actor/* (côté accompagnatrice/chauffeur)
 app.use('/kyc', kycRouter);
 
