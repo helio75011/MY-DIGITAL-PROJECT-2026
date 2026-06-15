@@ -101,21 +101,21 @@
 <body class="min-h-screen flex flex-col">
 
     <!-- Header -->
-    <header class="w-full bg-white shadow-sm border-b border-gray-100 z-50">
+    <header id="top" class="w-full bg-white shadow-sm border-b border-gray-100 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <div class="flex-shrink-0 flex items-center lg:pl-4">
-                    <a href="#" class="text-safe-blue font-bold text-2xl tracking-tight">Link&Walk</a>
+                    <a href="#top" class="text-safe-blue font-bold text-2xl tracking-tight">Link&Walk</a>
                 </div>
                 <nav class="hidden md:flex space-x-10">
-                    <a href="#" class="text-safe-blue font-semibold text-base px-1 pb-1 border-b-2 border-safe-blue">Solidaire</a>
-                    <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base transition duration-150 px-1 pb-1 border-b-2 border-transparent">Premium</a>
-                    <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base transition duration-150 px-1 pb-1 border-b-2 border-transparent">Conseils sécurité</a>
-                    <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base transition duration-150 px-1 pb-1 border-b-2 border-transparent">À propos</a>
+                    <a href="#solidaire" class="text-safe-blue font-semibold text-base px-1 pb-1 border-b-2 border-safe-blue">Solidaire</a>
+                    <a href="#modes" class="text-safe-gray hover:text-safe-blue font-medium text-base transition duration-150 px-1 pb-1 border-b-2 border-transparent">Premium</a>
+                    <a href="#securite" class="text-safe-gray hover:text-safe-blue font-medium text-base transition duration-150 px-1 pb-1 border-b-2 border-transparent">Conseils sécurité</a>
+                    <a href="#apropos" class="text-safe-gray hover:text-safe-blue font-medium text-base transition duration-150 px-1 pb-1 border-b-2 border-transparent">À propos</a>
                 </nav>
                 <div class="hidden md:flex items-center space-x-6 lg:pr-4">
-                    <a href="http://localhost:3000/admin" class="text-safe-gray hover:text-safe-blue font-semibold text-base transition duration-150">Connexion</a>
-                    <a href="#" class="bg-safe-blue text-white font-medium px-6 py-2.5 rounded-full hover:bg-opacity-90 transition duration-150 text-sm">Commencer</a>
+                    <a href="http://localhost:3000/admin" class="text-safe-gray hover:text-safe-blue font-semibold text-base transition duration-150">Espace modérateur</a>
+                    <a href="#commencer" class="bg-safe-blue text-white font-medium px-6 py-2.5 rounded-full hover:bg-opacity-90 transition duration-150 text-sm">Commencer</a>
                 </div>
 
                 <!-- Bouton burger (mobile uniquement) -->
@@ -138,14 +138,14 @@
             </button>
         </div>
         <nav class="flex flex-col px-6 py-6 space-y-2">
-            <a href="#" class="text-safe-blue font-semibold text-base py-3 border-b border-gray-100">Solidaire</a>
-            <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base py-3 border-b border-gray-100 transition">Premium</a>
-            <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base py-3 border-b border-gray-100 transition">Conseils sécurité</a>
-            <a href="#" class="text-safe-gray hover:text-safe-blue font-medium text-base py-3 border-b border-gray-100 transition">À propos</a>
+            <a href="#solidaire" class="text-safe-blue font-semibold text-base py-3 border-b border-gray-100">Solidaire</a>
+            <a href="#modes" class="text-safe-gray hover:text-safe-blue font-medium text-base py-3 border-b border-gray-100 transition">Premium</a>
+            <a href="#securite" class="text-safe-gray hover:text-safe-blue font-medium text-base py-3 border-b border-gray-100 transition">Conseils sécurité</a>
+            <a href="#apropos" class="text-safe-gray hover:text-safe-blue font-medium text-base py-3 border-b border-gray-100 transition">À propos</a>
         </nav>
         <div class="mt-auto px-6 pb-8 space-y-4">
-            <a href="http://localhost:3000/admin" class="block text-center text-safe-gray hover:text-safe-blue font-semibold text-base transition">Connexion</a>
-            <a href="#" class="block text-center bg-safe-blue text-white font-medium px-6 py-3 rounded-full hover:bg-opacity-90 transition text-sm">Commencer</a>
+            <a href="http://localhost:3000/admin" class="block text-center text-safe-gray hover:text-safe-blue font-semibold text-base transition">Espace modérateur</a>
+            <a href="#commencer" class="block text-center bg-safe-blue text-white font-medium px-6 py-3 rounded-full hover:bg-opacity-90 transition text-sm">Commencer</a>
         </div>
     </aside>
 
@@ -165,7 +165,7 @@
                             Rejoignez une communauté bienveillante d'accompagnatrices et d'agents certifiés pour vos trajets nocturnes. La ville vous appartient, jour et nuit.
                         </p>
                         <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-2">
-                            <a href="#" class="inline-flex items-center justify-center px-8 py-3.5 bg-safe-blue text-white font-semibold rounded-full hover:bg-opacity-90 transition shadow-custom-glow">
+                            <a href="#commencer" class="inline-flex items-center justify-center px-8 py-3.5 bg-safe-blue text-white font-semibold rounded-full hover:bg-opacity-90 transition shadow-custom-glow">
                                 <i class="fa-solid fa-download mr-2"></i> Télécharger l'app
                             </a>
                         </div>
@@ -180,7 +180,7 @@
         </section>
 
         <!-- Section : Choisissez votre tranquillité -->
-        <section class="py-20 bg-white">
+        <section id="modes" class="py-20 bg-white">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16">
                     <h2 class="text-3xl md:text-4xl font-extrabold text-safe-blue mb-4">Choisissez votre tranquillité</h2>
@@ -212,7 +212,7 @@
                             </ul>
                         </div>
                         <div class="mt-auto">
-                            <a href="#" class="inline-flex items-center text-badge-text font-bold hover:underline">Découvrir le programme <i class="fa-solid fa-arrow-right ml-2"></i></a>
+                            <a href="#solidaire" class="inline-flex items-center text-badge-text font-bold hover:underline">Découvrir le programme <i class="fa-solid fa-arrow-right ml-2"></i></a>
                         </div>
                     </div>
 
@@ -246,7 +246,7 @@
         </section>
 
         <!-- Section : Philosophie & Statistiques -->
-        <section class="py-24 bg-white border-t border-gray-50">
+        <section id="solidaire" class="py-24 bg-white border-t border-gray-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col lg:flex-row items-center gap-16">
                     
@@ -309,7 +309,7 @@
         </section>
 
         <!-- Section : Simple. Rapide. Sûr. -->
-        <section class="py-24 bg-[#e9ecef]">
+        <section id="securite" class="py-24 bg-[#e9ecef]">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <h2 class="text-3xl md:text-4xl font-extrabold text-safe-blue mb-4">Simple. Rapide. Sûr.</h2>
                 
@@ -351,7 +351,7 @@
         </section>
 
         <!-- Section : Paroles de femmes -->
-        <section class="py-24 bg-white border-t border-gray-50">
+        <section id="apropos" class="py-24 bg-white border-t border-gray-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <h2 class="text-3xl md:text-4xl font-extrabold text-safe-blue mb-12">Paroles de femmes</h2>
                 
@@ -390,7 +390,7 @@
         </section>
 
         <!-- NOUVELLE Section Finale : CTA Téléchargement (image_c3d9d8.png) -->
-        <section class="py-12 bg-white">
+        <section id="commencer" class="py-12 bg-white">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="cta-section py-16 px-8 md:px-16 text-center text-white shadow-2xl">
                     <h2 class="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
@@ -402,7 +402,7 @@
                     
                     <div class="flex flex-col sm:flex-row justify-center items-center gap-6">
                         <!-- Bouton App Store -->
-                        <a href="#" class="bg-white text-safe-dark-blue flex items-center gap-4 px-8 py-4 rounded-full hover:bg-blue-50 transition-all duration-300 group w-full sm:w-auto">
+                        <a href="#commencer" class="bg-white text-safe-dark-blue flex items-center gap-4 px-8 py-4 rounded-full hover:bg-blue-50 transition-all duration-300 group w-full sm:w-auto">
                             <i class="fa-brands fa-apple text-3xl"></i>
                             <div class="text-left leading-tight">
                                 <span class="text-[10px] uppercase font-bold tracking-wider block opacity-70">Télécharger sur l'</span>
@@ -411,7 +411,7 @@
                         </a>
 
                         <!-- Bouton Google Play -->
-                        <a href="#" class="bg-white text-safe-dark-blue flex items-center gap-4 px-8 py-4 rounded-full hover:bg-blue-50 transition-all duration-300 group w-full sm:w-auto">
+                        <a href="#commencer" class="bg-white text-safe-dark-blue flex items-center gap-4 px-8 py-4 rounded-full hover:bg-blue-50 transition-all duration-300 group w-full sm:w-auto">
                             <i class="fa-brands fa-google-play text-2xl"></i>
                             <div class="text-left leading-tight">
                                 <span class="text-[10px] uppercase font-bold tracking-wider block opacity-70">Disponible sur</span>

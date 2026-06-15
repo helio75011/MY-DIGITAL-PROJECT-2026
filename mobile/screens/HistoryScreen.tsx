@@ -79,12 +79,9 @@ export function HistoryScreen() {
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
       >
-        {/* En-tête de page */}
+        {/* En-tête de page (onglet : pas de retour) */}
         <Text style={styles.bigTitle}>Mon historique de trajet</Text>
         <View style={styles.titleRow}>
-          <Pressable hitSlop={8}>
-            <Feather name="chevron-left" size={24} color={colors.navy} />
-          </Pressable>
           <Text style={styles.title}>Historique</Text>
         </View>
         <Text style={styles.subtitle}>Retrouvez vos trajets et vos chauffeurs.</Text>

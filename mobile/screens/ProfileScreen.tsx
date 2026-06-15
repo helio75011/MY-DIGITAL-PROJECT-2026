@@ -2,11 +2,12 @@ import { Feather, FontAwesome, Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { fetchStats, type UserStats } from '../api/stats';
 import { useAuth } from '../auth/AuthContext';
 import { AppHeader } from '../components/AppHeader';
 import { MenuRow } from '../components/MenuRow';
+import { goToTab } from '../navigation/helpers';
 import type { RootStackParamList } from '../navigation/types';
 import { colors } from '../theme/colors';
 
@@ -33,11 +34,8 @@ export function ProfileScreen() {
       <AppHeader />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Titre de page */}
+        {/* Titre de page (onglet : pas de retour) */}
         <View style={styles.titleRow}>
-          <Pressable hitSlop={8}>
-            <Feather name="chevron-left" size={26} color={colors.navy} />
-          </Pressable>
           <Text style={styles.pageTitle}>Profil</Text>
         </View>
 
@@ -121,16 +119,31 @@ export function ProfileScreen() {
             divider
             onPress={() => navigation.navigate('Contacts')}
           />
-          <MenuRow icon="file-text" title="Documents de vérifications" subtitle="Vérifié" divider />
-          <MenuRow icon="clock" title="Historique des trajets" />
+          <MenuRow
+            icon="file-text"
+            title="Documents de vérifications"
+            subtitle={verified ? 'Vérifié' : 'À compléter'}
+            divider
+            onPress={() => navigation.navigate('Kyc')}
+          />
+          <MenuRow
+            icon="clock"
+            title="Historique des trajets"
+            onPress={() => goToTab(navigation, 'Historique')}
+          />
         </View>
 
         {/* Section Paramètres */}
         <Text style={styles.sectionTitle}>Paramètres de l'application</Text>
         <View style={styles.menuCard}>
-          <MenuRow icon="user" title="Préférences de compte" divider />
-          <MenuRow icon="bell" title="Notifications & Alertes" divider />
-          <MenuRow icon="help-circle" title="Aide & Support" />
+          <MenuRow
+            icon="help-circle"
+            title="Aide & Support"
+            subtitle="support@linkandwalk.fr"
+            onPress={() =>
+              Alert.alert('Aide & Support', 'Contactez-nous à support@linkandwalk.fr')
+            }
+          />
         </View>
 
         {/* Déconnexion */}

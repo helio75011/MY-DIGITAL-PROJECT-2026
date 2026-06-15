@@ -1,8 +1,12 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React from 'react';
-import { ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
+import * as LocalAuthentication from 'expo-local-authentication';
+import React, { useState } from 'react';
+import { ActivityIndicator, ImageBackground, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { sendEmergencySms } from '../api/contacts';
+import { getCurrentPosition } from '../api/location';
+import { reportIncident } from '../api/tracking';
 import { AppHeader } from '../components/AppHeader';
 import { goToTab } from '../navigation/helpers';
 import { colors } from '../theme/colors';
@@ -17,6 +21,48 @@ const mapBg = require('../assets/map-bg-2.png');
  */
 export function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [sosSending, setSosSending] = useState(false);
+  const [sosVisible, setSosVisible] = useState(false);
+
+  // SOS depuis l'accueil (hors trajet) : confirmation biométrique, incident
+  // serveur, SMS aux contacts avec la position. L'alerte n'est jamais bloquée.
+  async function handleSos() {
+    if (sosSending) return;
+    try {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const enrolled = await LocalAuthentication.isEnrolledAsync();
+      if (hasHardware && enrolled) {
+        const r = await LocalAuthentication.authenticateAsync({
+          promptMessage: "Confirmez l'alerte SOS",
+          cancelLabel: 'Annuler',
+        });
+        if (!r.success) return;
+      }
+    } catch {
+      /* biométrie indisponible : on poursuit */
+    }
+
+    setSosSending(true);
+    let position: { latitude: number; longitude: number } | undefined;
+    try {
+      const p = await getCurrentPosition();
+      position = { latitude: p.latitude, longitude: p.longitude };
+    } catch {
+      /* position indisponible */
+    }
+    try {
+      await reportIncident({ type: 'SOS', ...position });
+    } catch {
+      /* l'intention d'alerte prime */
+    }
+    try {
+      await sendEmergencySms('🚨 ALERTE SafeWalk : je déclenche un SOS.', position);
+    } catch {
+      /* SMS indisponible */
+    }
+    setSosVisible(true);
+    setSosSending(false);
+  }
 
   return (
     <View style={styles.root}>
@@ -65,8 +111,12 @@ export function HomeScreen() {
             </View>
 
             {/* Bouton SOS flottant (chevauche la ligne du dessus) */}
-            <Pressable style={styles.sosButton}>
-              <Text style={styles.sosText}>S.O.S</Text>
+            <Pressable style={styles.sosButton} onPress={handleSos} disabled={sosSending}>
+              {sosSending ? (
+                <ActivityIndicator color={colors.sosRed} />
+              ) : (
+                <Text style={styles.sosText}>S.O.S</Text>
+              )}
             </Pressable>
 
             {/* Bouton "Réservez votre chauffeur" */}
@@ -76,6 +126,24 @@ export function HomeScreen() {
           </View>
         </ImageBackground>
       </View>
+
+      {/* Modale de confirmation SOS */}
+      <Modal visible={sosVisible} transparent animationType="fade" onRequestClose={() => setSosVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalIcon}>
+              <Feather name="alert-triangle" size={32} color={colors.sosRed} />
+            </View>
+            <Text style={styles.modalTitle}>Alerte SOS envoyée</Text>
+            <Text style={styles.modalText}>
+              Votre position a été transmise à l'équipe de sécurité et à vos contacts d'urgence.
+            </Text>
+            <Pressable style={styles.modalBtn} onPress={() => setSosVisible(false)}>
+              <Text style={styles.modalBtnText}>J'ai compris</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -224,6 +292,56 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   driverButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  // Modale SOS
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+  },
+  modalCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    width: '100%',
+  },
+  modalIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colors.sosBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: colors.sosRed,
+    marginBottom: 8,
+  },
+  modalText: {
+    fontSize: 13,
+    color: colors.bodyText,
+    textAlign: 'center',
+    lineHeight: 19,
+    marginBottom: 20,
+  },
+  modalBtn: {
+    backgroundColor: colors.navy,
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    alignSelf: 'stretch',
+    alignItems: 'center',
+  },
+  modalBtnText: {
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '600',
