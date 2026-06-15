@@ -1,10 +1,12 @@
 import { Feather, FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import * as Battery from 'expo-battery';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
 import { ImageBackground, Linking, Modal, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { sendEmergencySms } from '../api/contacts';
 import { completeRide, reportIncident, sendTrackPoint } from '../api/tracking';
 import { AppHeader } from '../components/AppHeader';
 import { BottomNav } from '../components/BottomNav';
@@ -56,7 +58,32 @@ export function TrackingScreen({
   const [sosVisible, setSosVisible] = useState(false);
   const [sosSending, setSosSending] = useState(false);
   const [ratingVisible, setRatingVisible] = useState(false);
+  const [lowBattery, setLowBattery] = useState(false);
   const lastPos = useRef<{ latitude: number; longitude: number } | null>(null);
+
+  // Mode batterie faible : surveille le niveau et alerte sous 20 %.
+  useEffect(() => {
+    let sub: { remove: () => void } | undefined;
+    (async () => {
+      try {
+        const level = await Battery.getBatteryLevelAsync();
+        setLowBattery(level >= 0 && level <= 0.2);
+        sub = Battery.addBatteryLevelListener(({ batteryLevel }) => {
+          setLowBattery(batteryLevel >= 0 && batteryLevel <= 0.2);
+        });
+      } catch {
+        /* batterie indisponible (ex. émulateur) */
+      }
+    })();
+    return () => sub?.remove();
+  }, []);
+
+  async function sendBatterySms() {
+    await sendEmergencySms(
+      `🔋 Ma batterie est faible. Je suis en trajet SafeWalk avec ${displayName}, voici ma position en cas de coupure.`,
+      lastPos.current ?? undefined
+    ).catch(() => {});
+  }
 
   // Suivi temps réel : envoie la position GPS périodiquement tant que le trajet
   // est en cours, et fait progresser la barre jusqu'à l'arrivée.
@@ -132,19 +159,27 @@ export function TrackingScreen({
     if (sosSending) return;
     setSosSending(true);
     try {
+      // 1) Trace l'incident côté serveur (dashboard admin).
       await reportIncident({
         rideRef,
         type: 'SOS',
         latitude: lastPos.current?.latitude,
         longitude: lastPos.current?.longitude,
       });
-      setSosVisible(true);
     } catch {
-      // Même en cas d'échec réseau, on confirme visuellement l'intention d'alerte.
-      setSosVisible(true);
-    } finally {
-      setSosSending(false);
+      /* l'intention d'alerte prime même en cas d'échec réseau */
     }
+    // 2) Prévient les contacts d'urgence par SMS (position incluse).
+    try {
+      await sendEmergencySms(
+        `🚨 ALERTE SafeWalk : j'ai déclenché un SOS pendant mon trajet avec ${displayName}.`,
+        lastPos.current ?? undefined
+      );
+    } catch {
+      /* SMS indisponible : la modale confirme quand même l'alerte serveur */
+    }
+    setSosVisible(true);
+    setSosSending(false);
   }
 
   const liveEta = rideRef
@@ -185,6 +220,17 @@ export function TrackingScreen({
         </View>
         <Text style={styles.progressPercent}>{Math.round(progress)}% Complétée</Text>
       </View>
+
+      {/* Bannière mode batterie faible */}
+      {lowBattery ? (
+        <View style={styles.batteryBanner}>
+          <Feather name="battery" size={18} color={colors.sosRed} />
+          <Text style={styles.batteryText}>Batterie faible — sécurisez votre trajet</Text>
+          <Pressable style={styles.batteryBtn} onPress={sendBatterySms}>
+            <Text style={styles.batteryBtnText}>Envoyer ma position</Text>
+          </Pressable>
+        </View>
+      ) : null}
 
       {/* Boutons d'action + carte accompagnatrice, ancrés en bas */}
       <View style={styles.bottomBlock}>
@@ -348,6 +394,37 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     textAlign: 'center',
     marginTop: 1,
+  },
+  // Bannière batterie faible
+  batteryBanner: {
+    position: 'absolute',
+    top: 240,
+    left: 27,
+    right: 27,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: colors.sosBg,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  batteryText: {
+    flex: 1,
+    color: colors.sosRed,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  batteryBtn: {
+    backgroundColor: colors.sosRed,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  batteryBtnText: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '700',
   },
   // Bloc bas
   bottomBlock: {

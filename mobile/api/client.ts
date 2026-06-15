@@ -91,4 +91,13 @@ async function postForm<T>(path: string, form: FormData): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export const api = { getJson, postJson, postForm };
+async function del<T>(path: string): Promise<T> {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'DELETE',
+    headers: buildHeaders(),
+  });
+  if (!res.ok) await parseError(res);
+  return res.json() as Promise<T>;
+}
+
+export const api = { getJson, postJson, postForm, del };

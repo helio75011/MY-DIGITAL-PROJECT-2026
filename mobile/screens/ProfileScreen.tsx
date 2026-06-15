@@ -85,7 +85,13 @@ export function ProfileScreen() {
         {/* Section Sécurité & Protection */}
         <Text style={styles.sectionTitle}>SÉCURITÉ & PROTECTION</Text>
         <View style={styles.menuCard}>
-          <MenuRow icon="shield" title="Mes contacts" subtitle="3 actifs" divider />
+          <MenuRow
+            icon="shield"
+            title="Mes contacts"
+            subtitle="Contacts d'urgence"
+            divider
+            onPress={() => navigation.navigate('Contacts')}
+          />
           <MenuRow icon="file-text" title="Documents de vérifications" subtitle="Vérifié" divider />
           <MenuRow icon="clock" title="Historique des trajets" />
         </View>

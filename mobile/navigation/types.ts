@@ -7,6 +7,7 @@ export type RootStackParamList = {
   Biometric: undefined;
   MainTabs: undefined;
   Kyc: undefined;
+  Contacts: undefined;
   Matching: RideFlowParams;
   Driver: RideFlowParams;
   SafeMatch: SafeMatchParams;
